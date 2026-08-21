@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Upvotes extends Model
+class Upvote extends Model
 {
-    protected $table = 'upvotes';
+    protected $table = 'upvote';
 
     // No auto-incrementing primary key
     public $incrementing = false;
@@ -19,6 +19,6 @@ class Upvotes extends Model
 
     public function user()
     {
-        return $this->belongsTo(Users::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

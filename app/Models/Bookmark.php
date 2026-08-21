@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Bookmarks extends Model
+class Bookmark extends Model
 {
     protected $table = 'bookmarks';
 
@@ -18,11 +18,11 @@ class Bookmarks extends Model
 
     public function user()
     {
-        return $this->belongsTo(Users::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function post()
     {
-        return $this->belongsTo(Posts::class, 'post_id', 'post_id');
+        return $this->belongsTo(Post::class, 'post_id', 'post_id');
     }
 }

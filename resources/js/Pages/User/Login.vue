@@ -1,27 +1,47 @@
 <template>
-    <div class="container" style="width: 25%; padding-top: 100px;">
-            <h1>Login</h1>
-            <div class="container border">
-                <form  @submit.prevent="onSubmit" method="post">
-                    <label for="email">Email: </label><br>
-                    <input v-model="form.email" type="text" maxlength="50" id="email" name="email" required/><br>
+  <div class="flex flex-col justify-center items-center min-h-screen">
+    <Card class="container border max-w-100">
+      <template #title>
+        Login
+      </template>
+      <template #subtitle>
+        Login in to WeDoCare to engage with other users.
+      </template>
+      <template #content>
+        <form @submit.prevent="onSubmit" method="post">
+          <div class="flex flex-col">
+            <label for="email">Email<span style="color: red;">*</span> </label>
+            <InputText v-model="form.email" required />
+          </div>
+          
+          <div class="flex flex-col">
+            <label for="password">Password<span style="color: red;">*</span> </label>
+            <InputText v-model="form.password" required />
+          </div>
 
-                    <label for="password">Password: </label><br>
-                    <input v-model="form.password" type="password" maxlength="20" id="password" name="password" required/><br>
-
-                    <input v-model="form.remember" type="checkbox" id="remember" name="remember" value="remember">
-                    <label for="remember"> Remember me for a month</label><br>
-                </form>
-                <br>
-                <a href="/register">No Account? Register here</a>
-                <a href="/forgot_password" class="float-right">Forgot password?</a>
-            </div>
-            <a href="/" style="color: red;">Back</a>
-        </div>
+          <div class="py-2">
+            <Checkbox v-model="form.remember" />
+            <label for="remember"> Remember me when I visit this website </label>
+          </div>
+          
+          <Button class="w-full my-4" type="submit" label="Login" />
+        </form>
+      </template>
+      <template #footer>
+        <Link href="/user/register">No Account? Register here</Link>
+        <Link href="/user/forgot-password" class="float-right">Forgot password?</Link>
+      </template>
+    </Card>
+      <Link class="text-red" @click="goBack()">Go Back</Link>
+  </div>
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3'
+import { useForm, Link } from '@inertiajs/vue3'
+import Button from "primevue/button"
+import Card from 'primevue/card'
+import Checkbox from 'primevue/checkbox'
+import InputText from 'primevue/inputtext'
 
 const form = useForm({
   email: '',
@@ -31,5 +51,9 @@ const form = useForm({
 
 const onSubmit = () => {
   form.post('/action/login')
+}
+
+const goBack = () => {
+    window.history.back()
 }
 </script>

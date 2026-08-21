@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        // All this schema has been rebuilt for Postgre from MySQL
+        Schema::create('user', function (Blueprint $table) {
             $table->id('user_id');
             $table->string('username', 64);
             $table->text('user_photo')->nullable();
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->text('password');
             $table->enum('role', ['User', 'Admin'])->default('User');
+            $table->boolean('enabled_auth')->default(false);
             $table->boolean('is_suspended')->default(false);
 
             $table->rememberToken();
@@ -36,54 +38,54 @@ return new class extends Migration
         });
         */
 
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('post', function (Blueprint $table) {
             $table->id('post_id');
             $table->string('title');
             $table->text('description');
             $table->text('post_photo')->nullable();
-            $table->foreignId('user_id')->constrained('users', 'user_id');
+            $table->foreignId('user_id')->constrained('user', 'user_id');
             $table->timestamps();
         });
 
-        Schema::create('bookmarks', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('users', 'user_id');
-            $table->foreignId('post_id')->constrained('posts', 'post_id');
+        Schema::create('bookmark', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('post_id')->constrained('post', 'post_id');
             $table->timestamps();
         });
 
-        Schema::create('comments', function (Blueprint $table) {
+        Schema::create('comment', function (Blueprint $table) {
             $table->id('comment_id');
             $table->text('description');
             $table->text('comment_photo')->nullable();
-            $table->foreignId('user_id')->constrained('users', 'user_id');
-            $table->foreignId('post_id')->constrained('posts', 'post_id');
+            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('post_id')->constrained('post', 'post_id');
             $table->timestamps();
         });
 
-        Schema::create('feedbacks', function (Blueprint $table) {
+        Schema::create('feedback', function (Blueprint $table) {
             $table->id('feedback_id');
             $table->string('title');
             $table->text('description');
             $table->text('feedback_photo')->nullable();
-            $table->foreignId('user_id')->constrained('users', 'user_id');
+            $table->foreignId('user_id')->constrained('user', 'user_id');
             $table->timestamps();
             $table->softDeletes();
         });
 
-        Schema::create('reports', function (Blueprint $table) {
+        Schema::create('report', function (Blueprint $table) {
             $table->id('report_id');
             $table->string('report_desc');
             $table->string('report_type');
             $table->integer('report_no');
-            $table->foreignId('user_id')->constrained('users', 'user_id');
+            $table->foreignId('user_id')->constrained('user', 'user_id');
             $table->enum('status', ["Pending", "Resolved"]);
             $table->timestamps();
             $table->softDeletes();
             // reportNo is polymorphic (references posts or comments based on reportType), so no FK constraint
         });
 
-        Schema::create('upvotes', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('users', 'user_id');
+        Schema::create('upvote', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained('user', 'user_id');
             $table->string('content_type', 8);
             $table->integer('content_no');
             $table->timestamps();
@@ -97,12 +99,12 @@ return new class extends Migration
     public function down(): void
     {
         // Drop in reverse order to respect foreign key constraints
-        Schema::dropIfExists('upvotes');
-        Schema::dropIfExists('reports');
-        Schema::dropIfExists('feedbacks');
-        Schema::dropIfExists('comments');
-        Schema::dropIfExists('bookmarks');
-        Schema::dropIfExists('posts');
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('upvote');
+        Schema::dropIfExists('report');
+        Schema::dropIfExists('feedback');
+        Schema::dropIfExists('comment');
+        Schema::dropIfExists('bookmark');
+        Schema::dropIfExists('post');
+        Schema::dropIfExists('user');
     }
 };

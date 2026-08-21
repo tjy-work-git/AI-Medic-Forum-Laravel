@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['username', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class Users extends Authenticatable
+class User extends Authenticatable
 {
     /** @use HasFactory<UsersFactory> */
     use HasFactory, Notifiable, SoftDeletes;
@@ -24,7 +24,7 @@ class Users extends Authenticatable
      * @return array<string, string>
      */
 
-    protected $table = 'users';
+    protected $table = 'user';
 
     protected $primaryKey = 'user_id';
 

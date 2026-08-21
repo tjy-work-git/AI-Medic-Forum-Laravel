@@ -6,24 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Reports extends Model
+class Feedback extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'reports';
+    protected $table = 'feedbacks';
 
-    protected $primaryKey = 'report_id';
+    protected $primaryKey = 'feedback_id';
 
     protected $fillable = [
-        'report_desc',
-        'report_type',
-        'report_no',
+        'title',
+        'description',
+        'feedback_photo',
         'user_id',
-        'status',
     ];
 
     public function user()
     {
-        return $this->belongsTo(Users::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

@@ -12,12 +12,13 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::inertia('/', 'Index')->name('index');
+Route::inertia('/about-us', 'AboutUs')->name('aboutus');
 
 // AuthController
-Route::get('/login', [AuthController::class, 'get_login'])->name('login');
-Route::get('/register', [AuthController::class, 'get_register'])->name('register');
-Route::get('/authenticate', [AuthController::class, 'get_authenticate'])->name('authenticate');
-Route::post('/action/login', [AuthController::class, 'login'])->name('action.login');
+Route::get('/user/login', [AuthController::class, 'get_login'])->name('login');
+Route::get('/user/register', [AuthController::class, 'get_register'])->name('register');
+Route::get('/user/forgot-password', [AuthController::class, 'get_forgot_password'])->name('forgot_password');
+Route::post('/action/login', [AuthController::class, 'login_auth'])->name('action.login_auth');
 Route::post('/action/register', [AuthController::class, 'register'])->name('action.register');
 Route::post('/action/authenticate', [AuthController::class, 'authenticate'])->name('action.authenticate');
 Route::post('/action/logout', [AuthController::class, 'logout'])->name('action.logout');
