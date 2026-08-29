@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3'
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 import MainLayout from '@/Layouts/MainLayout.vue'
 
 createInertiaApp({
@@ -22,6 +23,7 @@ createInertiaApp({
         }
       })
       .use(ToastService)
+      .directive('tooltip', Tooltip)
       .mount(el)
   },
 })

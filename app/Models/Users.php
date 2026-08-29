@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['username', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class Users extends Authenticatable
 {
     /** @use HasFactory<UsersFactory> */
     use HasFactory, Notifiable, SoftDeletes;
@@ -24,7 +24,7 @@ class User extends Authenticatable
      * @return array<string, string>
      */
 
-    protected $table = 'user';
+    protected $table = 'users';
 
     protected $primaryKey = 'user_id';
 
@@ -46,31 +46,31 @@ class User extends Authenticatable
 
     public function posts()
     {
-        return $this->hasMany(Posts::class, 'user_id', 'user_id');
+        return $this->hasMany(Post::class, 'user_id', 'user_id');
     }
 
     public function comments()
     {
-        return $this->hasMany(Comments::class, 'user_id', 'user_id');
+        return $this->hasMany(Comment::class, 'user_id', 'user_id');
     }
 
     public function bookmarks()
     {
-        return $this->hasMany(Bookmarks::class, 'user_id', 'user_id');
+        return $this->hasMany(Bookmark::class, 'user_id', 'user_id');
     }
 
     public function feedbacks()
     {
-        return $this->hasMany(Feedbacks::class, 'user_id', 'user_id');
+        return $this->hasMany(Feedback::class, 'user_id', 'user_id');
     }
 
     public function reports()
     {
-        return $this->hasMany(Reports::class, 'user_id', 'user_id');
+        return $this->hasMany(Report::class, 'user_id', 'user_id');
     }
 
     public function upvotes()
     {
-        return $this->hasMany(Upvotes::class, 'user_id', 'user_id');
+        return $this->hasMany(Upvote::class, 'user_id', 'user_id');
     }
 }

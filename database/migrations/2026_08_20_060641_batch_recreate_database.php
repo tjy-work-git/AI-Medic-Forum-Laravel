@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // All this schema has been rebuilt for Postgre from MySQL
-        Schema::create('user', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->id('user_id');
             $table->string('username', 64);
             $table->text('user_photo')->nullable();
@@ -43,12 +43,12 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->text('post_photo')->nullable();
-            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->timestamps();
         });
 
         Schema::create('bookmark', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->foreignId('post_id')->constrained('post', 'post_id');
             $table->timestamps();
         });
@@ -57,7 +57,7 @@ return new class extends Migration
             $table->id('comment_id');
             $table->text('description');
             $table->text('comment_photo')->nullable();
-            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->foreignId('post_id')->constrained('post', 'post_id');
             $table->timestamps();
         });
@@ -67,7 +67,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->text('feedback_photo')->nullable();
-            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -77,7 +77,7 @@ return new class extends Migration
             $table->string('report_desc');
             $table->string('report_type');
             $table->integer('report_no');
-            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->enum('status', ["Pending", "Resolved"]);
             $table->timestamps();
             $table->softDeletes();
@@ -85,7 +85,7 @@ return new class extends Migration
         });
 
         Schema::create('upvote', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->string('content_type', 8);
             $table->integer('content_no');
             $table->timestamps();
@@ -105,6 +105,6 @@ return new class extends Migration
         Schema::dropIfExists('comment');
         Schema::dropIfExists('bookmark');
         Schema::dropIfExists('post');
-        Schema::dropIfExists('user');
+        Schema::dropIfExists('users');
     }
 };

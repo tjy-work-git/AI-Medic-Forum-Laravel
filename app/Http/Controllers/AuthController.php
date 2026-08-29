@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\MailerController;
-use App\Models\User;
+use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +37,7 @@ class AuthController extends Controller
         ]);
 
         // Find the user first and only get the user's email, auth, and is_suspended status
-        $user = User::where('email', $credentials['email'])->select('user_id', 'username', 'email', 'enabled_auth', 'is_suspended')->first();
+        $user = Users::where('email', $credentials['email'])->select('user_id', 'username', 'email', 'enabled_auth', 'is_suspended')->first();
 
         // Return error if does not exist
         if (!$user) {
@@ -95,17 +95,32 @@ class AuthController extends Controller
     }
 
     public function register(Request $request) {
-        // Validate the input
-        $validator = $request->validate([
+        // Define rules and message
+        $rules = [
             'username' => ['required', 'string'],
             'gender' => ['required', 'in:Male,Female'],
-            'email' => ['required', 'email', 'unique:user,email'],
+            'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'min:8'],
             'c_password' => ['required', 'same:password'],
-        ]);
+        ];
+
+        $messages = [
+            'username.required' => 'Username is a required field.',
+            'gender.required' => 'Gender is a required field.',
+            'email.required' => 'Email is a required field.',
+            'email.email' => 'Email is invalid.',
+            'email.unique' => 'Email already exists.',
+            'password.required' => 'Password is a required field.',
+            'password.min' => 'Password must be at least 8 characters.',
+            'c_password.required' => 'Confirm password is a required field.',
+            'c_password.same' => 'Password does not match with confirm password.',
+        ];
+        
+        // Validate the input
+        $validator = $request->validate($rules, $messages);
 
         // Create a new user
-        $user = User::create([
+        $user = Users::create([
             'username' => $validator['username'],
             'gender' => $validator['gender'],
             'email' => $validator['email'],

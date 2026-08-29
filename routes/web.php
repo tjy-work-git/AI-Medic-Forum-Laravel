@@ -26,3 +26,6 @@ Route::post('/action/logout', [AuthController::class, 'logout'])->name('action.l
 // ForumController
 Route::get('/forum', [ForumController::class, 'index'])->name('forum');
 Route::get('/forum/post/{id}', [ForumController::class, 'show']);
+
+// UserController
+Route::get('/user/profile/{id?}', [UserController::class, 'show'])->name('profile');

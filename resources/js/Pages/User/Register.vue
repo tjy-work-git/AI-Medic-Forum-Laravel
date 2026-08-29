@@ -38,7 +38,7 @@
         </form>
       </template>
     </Card>
-      <Link class="text-red" @click="goBack()">Go Back</Link>
+      <Link class="text-red py-4" @click="goBack()">Go Back</Link>
   </div>
 </template>
 

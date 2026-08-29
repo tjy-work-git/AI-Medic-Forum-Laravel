@@ -1,7 +1,9 @@
 <template>
     <Toast />
     <HeaderLayout v-if="showHeader" />
-    <slot />
+    <div class="m-4 pb-10">
+        <slot />
+    </div>
     <FooterLayout/>
 </template>
 
