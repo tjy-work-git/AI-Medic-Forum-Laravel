@@ -3,7 +3,7 @@
         <ProfileSidebar />
 
         <div class="flex flex-col w-full gap-4">
-            <Deferred data="profile_data">
+            <Deferred data="data">
                 <template #fallback>
                     <div class="flex justify-center items-center min-h-screen">
                         <ProgressSpinner />
@@ -11,25 +11,6 @@
                 </template>
 
                 <Card>
-                    <template #header>
-                        <h1 class="text-4xl font-bold m-4">Profile</h1>
-                    </template>
-                    <template #content>
-                        <div class="flex flex-row m-4 gap-4">
-                            <UserAvatar :size="'xlarge'" :user="profile_data" />
-                            <div class="flex flex-col">
-                                <h3 class="text-2xl font-bold">{{ profile_data.username }}</h3>
-                                <p class="font-bold">{{ profile_data.role }}</p>
-                                <p>{{ profile_data.gender }}</p>
-                                <p>Joined on {{ profile_data.created_at }}</p>
-                                <p><b>{{ profile_data.total_upvotes }} upvotes from contribution</b></p>
-                                <i>{{ profile_data.bio ?? 'This user have not left anything here yet...' }}</i>
-                            </div>
-                        </div>
-                    </template>
-                </Card>
-
-                <Card v-if="profile_data.user_id === current_user.user_id">
                     <template #header>
                         <h1 class="text-4xl font-bold m-4">Edit Details</h1>
                     </template>
@@ -54,9 +35,13 @@
 
                             <!-- Security -->
                             <h3 class="text-xl font-bold">Security Details</h3>
+                            <div class="py-2">
+                                <Checkbox v-model="form.email_change" binary />
+                                <label for="email_change"> Enable email change </label>
+                            </div>
                             <div class="flex flex-col">
                                 <label for="email">Email<span style="color: red;">*</span> </label>
-                                <InputText v-model="form.email" required />
+                                <InputText :disabled="!form.email_change" v-model="form.email" required />
                             </div>
                             <div class="py-2">
                                 <Checkbox v-model="form.password_change" binary />
@@ -89,8 +74,9 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
-import { useForm, usePage, Deferred } from '@inertiajs/vue3'
+import { watch } from 'vue'
+import { useForm, Deferred } from '@inertiajs/vue3'
+
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Checkbox from 'primevue/checkbox'
@@ -98,12 +84,10 @@ import InputText from 'primevue/inputtext'
 import ProgressSpinner from 'primevue/progressspinner'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import ProfileSidebar from '@/Components/ProfileSidebar.vue'
-import UserAvatar from '@/Components/UserAvatar.vue'
 
-const page = usePage()
-const current_user = computed(() => page.props.auth?.current_user)
-const props = defineProps({ profile_data: Object })
+import ProfileSidebar from '@/Components/ProfileSidebar.vue'
+
+const props = defineProps({ data: Object })
 
 const form = useForm({
     username: '',
@@ -112,15 +96,16 @@ const form = useForm({
     email: '',
     password: '',
     c_password: '',
+    email_change: false,
     password_change: false,
     enable_auth: false,
 })
 
 const onSubmit = () => {
-    form.post('/action/login') // change later
+    form.post('/user/profile/update') // change later
 }
 
-watch(() => props.profile_data, (data) => {
+watch(() => props.data, (data) => {
     if (data) {
         form.username = data.username ?? ''
         form.bio = data.bio ?? ''

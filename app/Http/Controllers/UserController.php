@@ -10,33 +10,21 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(int $id = null)
     {
         $targetId = $id ?? Auth::id();
@@ -81,35 +69,30 @@ class UserController extends Controller
                 ), 0) AS total_upvotes', ['post', 'comment'])
             ->first();
 
-        return Inertia::render('User/Profile', [
+        return Inertia::render('User/Profile/Index', [
             'profile_data' => Inertia::defer(fn() => $user)
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit()
     {
-        //
+       return Inertia::render('User/Profile/Update', [
+            'data' => Inertia::defer(fn() => Auth::user())
+        ]); 
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         $id = Auth::id();
         if (!$id) {
             return redirect()->back()->with('error','You must be logged in to update your profile.');
         }
 
+        // Standard rules and messages
         $rules = [
             'username' => ['required', 'string'],
+            'bio' => ['nullable', 'string'],
             'gender' => ['required', 'in:Male,Female'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required_if:password_change,true', 'min:8'],
-            'c_password' => ['required_if:password_change,true', 'same:password'],
             'password_change' => ['nullable', 'boolean'],
             'enable_auth' => ['nullable', 'boolean'],
         ];
@@ -117,41 +100,53 @@ class UserController extends Controller
         $messages = [
             'username.required' => 'Username is a required field.',
             'gender.required' => 'Gender is a required field.',
-            'email.required' => 'Email is a required field.',
-            'email.email' => 'Email is invalid.',
-            'email.unique' => 'Email already exists.',
-            'password.required' => 'Password is a required field.',
-            'password.min' => 'Password must be at least 8 characters.',
-            'c_password.required' => 'Confirm password is a required field.',
-            'c_password.same' => 'Password does not match with confirm password.',
         ];
+
+        // Enable rules if email change is enabled
+        if ($request->email_change) {
+            $rules['email'] = 'required,email,unique:users,email';
+            $messages['email.required'] = 'Email is a required field.';
+            $messages['email.email'] = 'Email is invalid.';
+            $messages['email.unique'] = 'Email already exists.';
+        }
+
+        // Enable rules if password change is enabled
+        if ($request->password_change) {
+            $rules['password'] = 'required|min:8';
+            $rules['c_password'] = 'required|same:password';
+            $messages['password.required'] = 'Password is a required field.';
+            $messages['password.min'] = 'Password must be at least 8 characters.';
+            $messages['c_password.required'] = 'Confirm password is a required field.';
+            $messages['c_password.same'] = 'Confirm password does not match with password.';
+        }
         
         // Validate the input
         $validator = $request->validate($rules, $messages);
 
-        if ($request->password_change) {
-            Users::where('user_id', $id)->update([
-                'username' => $validator['username'],
-                'gender' => $validator['gender'],
-                'email' => $validator['email'],
-                'password' => Hash::make($validator['password']),
-                'enable_auth' => $validator['enable_auth'],
-            ]);
-        } else {
-            Users::where('user_id', $id)->update([
-                'username' => $validator['username'],
-                'gender' => $validator['gender'],
-                'email' => $validator['email'],
-                'enable_auth' => $validator['enable_auth'],
-            ]);
+        // Recollect all the data from validator
+        $data = [
+            'username'     => $validator['username'],
+            'bio'          => $validator['bio'],
+            'gender'       => $validator['gender'],
+            'enabled_auth' => $validator['enable_auth'] ?? false,
+        ];
+
+        // Only include this if the email change is enabled
+        if (!empty($validator['email'])) {
+            $data['email'] = $validator['email'];
         }
+
+        // Only include this if the password change is enabled
+        if (!empty($validator['password'])) {
+            $data['password'] = Hash::make($validator['password']);
+        }
+
+        // Execute update
+        Users::where('user_id', $id)->update($data);
 
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //

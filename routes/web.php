@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     // UserController
-    Route::get('/account/{activeTab?}', [UserController::class, 'account_info'])->name('account');
+    Route::get('/user/profile/edit', [UserController::class, 'edit'])->name('user.profile.edit');
+    Route::post('/user/profile/update', [UserController::class, 'update'])->name('user.profile.update');
+    Route::get('/user/profile/{id?}', [UserController::class, 'show'])->name('user.profile');
 });
 
 Route::inertia('/', 'Index')->name('index');
@@ -27,5 +29,3 @@ Route::post('/action/logout', [AuthController::class, 'logout'])->name('action.l
 Route::get('/forum', [ForumController::class, 'index'])->name('forum');
 Route::get('/forum/post/{id}', [ForumController::class, 'show']);
 
-// UserController
-Route::get('/user/profile/{id?}', [UserController::class, 'show'])->name('profile');
