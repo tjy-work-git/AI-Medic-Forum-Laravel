@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('user_photo')->nullable();
             $table->text('bio')->nullable();
             $table->enum('gender', ['Male', 'Female']);
-            $table->string('email')->unique();
+            $table->string('email');
             $table->text('password');
             $table->enum('role', ['User', 'Admin'])->default('User');
             $table->boolean('enabled_auth')->default(false);

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bookmark extends Model
 {
-    protected $table = 'bookmarks';
+    protected $table = 'bookmark';
 
     // No auto-incrementing primary key (pivot table)
     public $incrementing = false;

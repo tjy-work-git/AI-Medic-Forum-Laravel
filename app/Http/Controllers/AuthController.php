@@ -6,30 +6,34 @@ use App\Mail\MailerController;
 use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    public function get_login(Request $request) {
+    public function get_login(Request $request)
+    {
         if (Auth::check()) {
             return redirect()->intended('/');
         }
-        
+
         return Inertia::render('User/Login')->with('showHeader', false);
     }
 
-    public function get_register(Request $request) {
+    public function get_register(Request $request)
+    {
         if (Auth::check()) {
             return redirect()->intended('/');
         }
-        
+
         return Inertia::render('User/Register')->with('showHeader', false);
     }
 
-    public function login_auth(Request $request) {
+    public function login_auth(Request $request)
+    {
         // Validate the input: will throw error if fails so no need return
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -37,7 +41,9 @@ class AuthController extends Controller
         ]);
 
         // Find the user first and only get the user's email, auth, and is_suspended status
-        $user = Users::where('email', $credentials['email'])->select('user_id', 'username', 'email', 'enabled_auth', 'is_suspended')->first();
+        $user = Users::where('email', $credentials['email'])
+            ->select('user_id', 'username', 'email', 'enabled_auth', 'is_suspended')
+            ->first();
 
         // Return error if does not exist
         if (!$user) {
@@ -74,7 +80,8 @@ class AuthController extends Controller
         }
     }
 
-    public function login_process($credentials, $request) {
+    public function login_process($credentials, $request)
+    {
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('/')->with('success', 'Welcome, ' . Auth::user()->username . '!');
@@ -85,7 +92,8 @@ class AuthController extends Controller
             ->with('error', 'Your email / password is incorrect.');
     }
 
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         Auth::logout();
 
         $request->session()->invalidate();
@@ -94,12 +102,13 @@ class AuthController extends Controller
         return redirect('/')->with('success', 'You have been logged out.');
     }
 
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         // Define rules and message
         $rules = [
             'username' => ['required', 'string'],
             'gender' => ['required', 'in:Male,Female'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at'),],
             'password' => ['required', 'min:8'],
             'c_password' => ['required', 'same:password'],
         ];
@@ -115,7 +124,7 @@ class AuthController extends Controller
             'c_password.required' => 'Confirm password is a required field.',
             'c_password.same' => 'Password does not match with confirm password.',
         ];
-        
+
         // Validate the input
         $validator = $request->validate($rules, $messages);
 
@@ -136,7 +145,8 @@ class AuthController extends Controller
         return redirect('/user/login')->with('success', 'Account created successfully!');
     }
 
-    public function authenticate(Request $request) {
+    public function authenticate(Request $request)
+    {
         // Validate the input
         $credentials = $request->validate([
             'otp' => ['required', 'size:6'],
@@ -153,7 +163,8 @@ class AuthController extends Controller
         return true;
     }
 
-    private function generate_otp($uid) {
+    private function generate_otp($uid)
+    {
         $code = rand(100000, 1000000);
 
         // Stores in a temporary cache

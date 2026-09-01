@@ -10,7 +10,7 @@ class Report extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'reports';
+    protected $table = 'report';
 
     protected $primaryKey = 'report_id';
 

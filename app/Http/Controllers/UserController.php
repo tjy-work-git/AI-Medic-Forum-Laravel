@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Users;
+use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -25,7 +27,7 @@ class UserController extends Controller
         //
     }
 
-    public function show(int $id = null)
+    public function show_user(int $id = null)
     {
         $targetId = $id ?? Auth::id();
 
@@ -74,6 +76,21 @@ class UserController extends Controller
         ]);
     }
 
+    public function show_posts(int $id = null)
+    {
+        $targetId = $id ?? Auth::id();
+
+        $posts = Post::leftJoin('upvote', 'upvote.content_no', 'post.post_id')
+            ->select('post.*')
+            ->selectRaw('COALESCE(COUNT(upvote.content_no), 0) as upvote_count')
+            ->where('post.user_id', $targetId)
+            ->groupBy('post.post_id')
+            ->orderBy('post.created_at', 'desc')
+            ->get();
+
+        return response()->json($posts);
+    }
+
     public function edit()
     {
        return Inertia::render('User/Profile/Update', [
@@ -104,7 +121,7 @@ class UserController extends Controller
 
         // Enable rules if email change is enabled
         if ($request->email_change) {
-            $rules['email'] = 'required,email,unique:users,email';
+            $rules['email'] = ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at'),];
             $messages['email.required'] = 'Email is a required field.';
             $messages['email.email'] = 'Email is invalid.';
             $messages['email.unique'] = 'Email already exists.';
@@ -144,11 +161,31 @@ class UserController extends Controller
         // Execute update
         Users::where('user_id', $id)->update($data);
 
-        return redirect()->back()->with('success', 'Profile updated successfully!');
+        return redirect()->intended('user/profile')->with('success', 'Profile updated successfully!');
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->back()->with('error','You are not logged in.');
+        }
+
+        $validator = $request->validate([
+            'delete_email' => 'required|email|in:' . $user->email,
+        ], [
+            'delete_email.required' => 'Please enter your email to proceed.',
+            'delete_email.email' => 'Please enter a valid email.',
+            'delete_email.in' => 'Email does not match.',
+        ]);
+
+        Users::where('email', $validator['delete_email'])->delete();
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->intended('/');
     }
 }

@@ -10,7 +10,7 @@ class Feedback extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'feedbacks';
+    protected $table = 'feedback';
 
     protected $primaryKey = 'feedback_id';
 

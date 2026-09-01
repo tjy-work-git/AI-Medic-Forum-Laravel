@@ -10,7 +10,9 @@ Route::middleware('auth')->group(function () {
     // UserController
     Route::get('/user/profile/edit', [UserController::class, 'edit'])->name('user.profile.edit');
     Route::post('/user/profile/update', [UserController::class, 'update'])->name('user.profile.update');
-    Route::get('/user/profile/{id?}', [UserController::class, 'show'])->name('user.profile');
+    Route::post('/user/profile/delete', [UserController::class, 'destroy'])->name('user.profile.delete');
+    Route::get('/user/posts/{id?}', [UserController::class, 'show_posts'])->name('user.posts');
+    Route::get('/user/profile/{id?}', [UserController::class, 'show_user'])->name('user.profile');
 });
 
 Route::inertia('/', 'Index')->name('index');

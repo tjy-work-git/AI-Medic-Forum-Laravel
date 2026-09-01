@@ -31,6 +31,8 @@
                         </div>
                     </template>
                 </Card>
+
+                <PostHistory :id="profile_data.user_id" />
             </Deferred>
         </div>
     </div>
@@ -39,9 +41,12 @@
 <script setup>
 import { computed } from 'vue'
 import { usePage, Deferred, Link } from '@inertiajs/vue3'
+
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import ProgressSpinner from 'primevue/progressspinner'
+
+import PostHistory from '@/Components/PostHistory.vue'
 import ProfileSidebar from '@/Components/ProfileSidebar.vue'
 import UserAvatar from '@/Components/UserAvatar.vue'
 
