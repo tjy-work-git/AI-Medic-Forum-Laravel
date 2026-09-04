@@ -12,14 +12,14 @@
           <div class="flex flex-col gap-2">
             <div class="flex flex-col">
               <label for="uname">Username<span style="color: red;">*</span></label>
-              <InputText v-model="form.username" required/>
+              <InputText v-model="form.username" required />
             </div>
 
             <div class="flex flex-col">
               <label for="email">Email<span style="color: red;">*</span></label>
               <InputText v-model="form.email" required />
             </div>
-            
+
             <div class="flex flex-col">
               <label for="password">Password<span style="color: red;">*</span></label>
               <InputText v-model="form.password" required />
@@ -32,7 +32,9 @@
 
             <div class="flex flex-col">
               <label for="gender">Gender<span style="color: red;">*</span></label>
-              <Select class="w-full border rounded" v-model="form.gender" required :options="[ { label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }]" optionLabel="label" optionValue="value"/>
+              <Select class="w-full border rounded" v-model="form.gender" required
+                :options="[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }]" optionLabel="label"
+                optionValue="value" />
             </div>
           </div>
         </form>
@@ -41,7 +43,7 @@
         <Button class="w-full my-4" type="submit" form="register-form" label="Register" />
       </template>
     </Card>
-      <Link class="text-red py-4" @click="goBack()">Go Back</Link>
+    <Link class="text-red py-4" @click="goBack()">Go Back</Link>
   </div>
 </template>
 
@@ -65,6 +67,6 @@ const onSubmit = () => {
 }
 
 const goBack = () => {
-    window.history.back()
+  window.history.back()
 }
 </script>

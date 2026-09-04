@@ -1,5 +1,5 @@
 <template>
-    <Card>
+    <Card class="min-h-screen">
         <template #title>Post History</template>
         <template #content>
             <div v-if="loading" class="flex justify-center items-center min-h-screen">
@@ -15,7 +15,7 @@
             </template>
 
             <template v-else>
-                <p>No posts found.</p>
+                <p class="flex justify-center items-center">No posts history found.</p>
             </template>
         </template>
     </Card>

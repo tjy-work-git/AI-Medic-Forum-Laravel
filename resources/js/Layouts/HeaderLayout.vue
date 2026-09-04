@@ -14,9 +14,11 @@
             <Link v-if="!current_user" href="/user/login">Login</Link>
             <UserAvatar v-else class="cursor-pointer" @click="toggle" :user="current_user" />
             <Popover ref="op">
-                <p>Welcome, {{ current_user.username }}</p>
-                <Link href="/user/profile">Profile</Link>
-                <Button class="w-full my-2" severity="danger" @click="logout()" label="Logout"/>
+                <div class="flex flex-col gap-2">
+                    <p>Welcome, {{ current_user.username }}</p>
+                    <Link href="/user/profile"><span class="mr-2"><User /></span>Profile</Link>
+                    <Button class="w-full my-2" severity="danger" @click="logout()" label="Logout"/>
+                </div>
             </Popover>
         </template>
     </Menubar>
@@ -25,11 +27,15 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
-import UserAvatar from '@/Components/UserAvatar.vue'
 import { router } from '@inertiajs/vue3'
+
 import Button from 'primevue/button'
 import Menubar from 'primevue/menubar'
 import Popover from 'primevue/popover'
+
+import User from '@primeicons/vue/user'
+
+import UserAvatar from '@/Components/UserAvatar.vue'
 import logoUrl from '../../images/static/wedocare_logo.png'
 import bgUrl from '../../images/static/bg.jpg'
 

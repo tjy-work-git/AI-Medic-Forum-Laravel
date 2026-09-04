@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\UserController;

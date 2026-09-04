@@ -1,5 +1,5 @@
 <template>
-    <Card class="w-1/4">
+    <Card class="w-1/6">
         <template #content>
             <div class="flex flex-col gap-4">
                 <Link href="/user/profile">
