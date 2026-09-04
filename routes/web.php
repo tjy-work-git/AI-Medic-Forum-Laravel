@@ -9,11 +9,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     // UserController
-    Route::get('/user/profile/edit', [UserController::class, 'edit'])->name('user.profile.edit');
     Route::post('/user/profile/update', [UserController::class, 'update'])->name('user.profile.update');
     Route::post('/user/profile/delete', [UserController::class, 'destroy'])->name('user.profile.delete');
+    Route::get('/user/profile/edit', [UserController::class, 'edit'])->name('user.profile.edit');
     Route::get('/user/posts/{id?}', [UserController::class, 'show_posts'])->name('user.posts');
     Route::get('/user/profile/{id?}', [UserController::class, 'show_user'])->name('user.profile');
+
+    // Forum Controller
+    Route::post('/forum/post/store', [ForumController::class,'store_post'])->name('forum.store_post');
+    Route::get('/forum/post/create', [ForumController::class, 'create'])->name('forum.create');
 });
 
 Route::inertia('/', 'Index')->name('index');

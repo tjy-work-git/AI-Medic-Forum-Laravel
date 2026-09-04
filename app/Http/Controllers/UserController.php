@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Users;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -93,7 +93,7 @@ class UserController extends Controller
 
     public function edit()
     {
-       return Inertia::render('User/Profile/Update', [
+       return Inertia::render('User/Profile/Edit', [
             'data' => Inertia::defer(fn() => Auth::user())
         ]); 
     }

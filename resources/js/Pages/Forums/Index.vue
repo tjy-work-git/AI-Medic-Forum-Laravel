@@ -148,8 +148,8 @@ $conn = null;
 -->
 
 <template>
-    <!-- Absoulte add post button - follows the bottom of page always-->
-    <Link href="/forum/post/create" form="searchForm" style="position: absolute; bottom: 60px; right: 30px;">
+    <!-- Sticky add post button -->
+    <Link href="/forum/post/create" form="searchForm" style="position: fixed; bottom: 60px; right: 30px; z-index: 100;">
         <Button rounded size="xlarge">
             <template #icon>
                 <Plus />
@@ -158,7 +158,7 @@ $conn = null;
     </Link>
 
     <div>
-        <h1>Forums</h1>
+        <h1 class="text-4xl font-bold m-4">Forums</h1>
         <Card>
             <template #content>
                 <form @submit.prevent="searchForm.get('/forum')">
@@ -196,18 +196,20 @@ $conn = null;
                 </template>
 
                 <template v-else>
-                    <template v-for="post in posts" :key="post.post_id">
+                    <template v-for="post in posts.data" :key="post.post_id">
                         <Link :href="'/forum/post/' + post.post_id">
-                            <Card>
+                            <Card class="my-2">
                                 <template #title>
-                                    <h2>{{ post.title }}</h2>
+                                    <h2 class="text-xl font-bold">{{ post.title }}</h2>
                                 </template>
                                 <template #content>
                                     <p class="mb-2">{{ post.description.substring(0, 100) + "..." }}</p>
-                                    <small>Posted by <b>{{ post.username ?? "[deleted]" }}</b> on {{ post.postDate }}</small>
                                 </template>
                                 <template #footer>
-                                    <p class="float-right">{{ post.upvotes }} Upvotes</p>
+                                    <div class="flex flex-wrap justify-between">
+                                        <p>{{ post.username ?? "[deleted]" }} on {{ post.created_at }}</p>
+                                        <p>{{ post.upvotes }} Upvotes</p>
+                                    </div>
                                 </template>
                             </Card>
                         </Link>

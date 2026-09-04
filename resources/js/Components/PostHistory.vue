@@ -1,17 +1,32 @@
 <template>
     <Card class="min-h-screen">
-        <template #title>Post History</template>
+        <template #title>
+            <h1 class="text-4xl font-bold m-4">Post History</h1>
+        </template>
         <template #content>
             <div v-if="loading" class="flex justify-center items-center min-h-screen">
                 <ProgressSpinner />
             </div>
 
             <template v-else-if="posts.length > 0">
-                <div class="flex flex-row gap-2" v-for="post in posts">
-                    <p>{{ post.title }}</p>
-                    <p>{{ post.upvotes }} upvotes</p>
-                    <Divider />
-                </div>
+                <template v-for="post in posts">
+                    <Link :href="'/forum/post/' + post.post_id">
+                        <Card class="my-2">
+                            <template #title>
+                                <h2 class="text-xl font-bold">{{ post.title }}</h2>
+                            </template>
+                            <template #content>
+                                <p class="mb-2">{{ post.description.substring(0, 100) + "..." }}</p>
+                            </template>
+                            <template #footer>
+                                <div class="flex flex-wrap justify-between">
+                                    <p>Posted on {{ post.created_at }}</p>
+                                    <p>{{ post.upvotes }} Upvotes</p>
+                                </div>
+                            </template>
+                        </Card>
+                    </Link>
+                </template>
             </template>
 
             <template v-else>
@@ -23,9 +38,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { Link } from '@inertiajs/vue3'
 
 import Card from 'primevue/card';
-import Divider from 'primevue/divider';
 
 import ProgressSpinner from 'primevue/progressspinner';
 
