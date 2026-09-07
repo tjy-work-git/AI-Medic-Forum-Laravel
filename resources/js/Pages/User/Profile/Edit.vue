@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-row gap-4">
-        <ProfileSidebar />
 
         <div class="flex flex-col w-full gap-4">
             <Deferred data="data">
@@ -113,9 +112,11 @@
 </template>
 
 <script setup>
+// Libraries
 import { watch, ref } from 'vue'
 import { useForm, Deferred } from '@inertiajs/vue3'
 
+// Primevue
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Checkbox from 'primevue/checkbox'
@@ -125,9 +126,8 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 
+// Primevue Icons
 import ArrowLeft from '@primeicons/vue/arrow-left'
-
-import ProfileSidebar from '@/Components/ProfileSidebar.vue'
 
 const props = defineProps({ data: Object })
 const deleteVisible = ref(false)
