@@ -1,10 +1,11 @@
 //
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
-import PrimeVue from 'primevue/config';
-import Aura from '@primevue/themes/aura';
-import ToastService from 'primevue/toastservice';
-import Tooltip from 'primevue/tooltip';
+import PrimeVue from 'primevue/config'
+import Aura from '@primevue/themes/aura'
+import ToastService from 'primevue/toastservice'
+import ConfirmationService from 'primevue/confirmationservice'
+import Tooltip from 'primevue/tooltip'
 import MainLayout from '@/Layouts/MainLayout.vue'
 
 createInertiaApp({
@@ -23,6 +24,7 @@ createInertiaApp({
         }
       })
       .use(ToastService)
+      .use(ConfirmationService)
       .directive('tooltip', Tooltip)
       .mount(el)
   },

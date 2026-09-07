@@ -53,7 +53,9 @@
         <div class="w-full mb-100px">
             <Deferred data="posts">
                 <template #fallback>
-                    <ProgressSpinner />
+                    <div class="flex justify-center items-center min-h-screen">
+                        <ProgressSpinner />
+                    </div>
                 </template>
 
                 <template #default>

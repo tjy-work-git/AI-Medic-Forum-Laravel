@@ -32,35 +32,50 @@
     <template v-else>
         <!-- Post Section -->
         <div class="flex flex-col gap-2">
-            <h1 class="text-4xl font-bold">{{ post.title }}</h1>
+            <div class="flex flex-wrap items-center">
+                <h1 class="text-4xl font-bold my-6">{{ post.title }}</h1>
+                <Button class="mx-6" variant="text" rounded>
+                    <template #icon>
+                        <Bookmark v-tooltip.bottom="{ value: 'Bookmark' }"/>
+                    </template>
+                </Button>
+            </div>
 
-            <p>{{ post.username ?? "[deleted]" }} on {{ post.created_at }}</p>
-            <p class="mb-2">{{ post.description }}</p>
+            <div class="flex flex-row gap-10">
+                <!-- Poster info card -->
+                <UserInfoCard :data="post" />
 
-            <div class="flex flex-wrap justify-between">
-                <p>{{ post.upvotes }} Upvotes</p>
+                <!-- Content -->
+                <Card class="w-full ">
+                    <template #content>
+                        <p class="mb-2">{{ post.description }}</p>
+                    </template>
+                </Card>
             </div>
         </div>
 
+        <Divider align="left" class="py-6">
+            <h2 class="text-2xl font-bold">Comments <Badge :value="comments.total" severity="secondary"/></h2>
+        </Divider>
+
         <!-- Comment Section -->
-        <h2 class="text-4xl font-bold my-4">Comments</h2>
             <template v-if="loading" class="flex justify-center items-center min-h-screen">
                 <ProgressSpinner />
             </template>
 
             <template v-else-if="comments.data.length > 0">
                 <template v-for="comment in comments.data" :key="comment.comment_id">
-                    <Card class="mb-4">
-                        <template #content>
-                            <p class="mb-2">{{ comment.description }}</p>
-                        </template>
-                        <template #footer>
-                            <div class="flex flex-wrap justify-between">
-                                <p>{{ comment.username ?? "[deleted]" }} on {{ comment.created_at }}</p>
-                                <p>{{ comment.upvotes }} Upvotes</p>
-                            </div>
-                        </template>
-                    </Card>
+                    <div class="flex flex-row gap-10 mb-4">
+                        <!-- Commenter info card -->
+                        <UserInfoCard :data="comment" />
+
+                        <!-- Content -->
+                        <Card class="w-full">
+                            <template #content>
+                                <p class="mb-2">{{ comment.description }}</p>
+                            </template>
+                        </Card>
+                    </div>
                 </template>
             </template>
 
@@ -73,19 +88,25 @@
 <script setup>
 // Libraries
 import { onMounted, ref, watch } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 
 // Primevue
+import Badge from 'primevue/badge'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Dialog from 'primevue/dialog'
+import Divider from 'primevue/divider'
 import FileUpload from 'primevue/fileupload'
 import Textarea from 'primevue/textarea';
 import ProgressSpinner from 'primevue/progressspinner';
 
-// PrimevueIcons
+// Primevue Icons
+import Bookmark from '@primeicons/vue/bookmark'
+import BookmarkFill from '@primeicons/vue/bookmark-fill' // will use for bookmarked content, wip
 import Comment from '@primeicons/vue/comment';
-import Comments from '@primeicons/vue/comments'; // will figure to use it proper later
+
+// Custom Imports
+import UserInfoCard from '@/Components/UserInfoCard.vue'
 
 const visible = ref(false);
 const props = defineProps({ post: Object })

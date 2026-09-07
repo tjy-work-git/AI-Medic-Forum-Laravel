@@ -13,7 +13,7 @@
                 </template>
                 <template #content>
                     <div class="flex flex-row">
-                        <UserAvatar class="mx-4 shrink-0" :size="150" :img="profile_data.user_photo" />
+                        <UserAvatar class="mx-4" :size="150" :img="profile_data.user_photo" />
                         <div class="flex flex-col flex-1 min-w-0 mx-10 gap-2">
                             <h3 class="text-2xl font-bold">
                                 {{ profile_data.username }}
