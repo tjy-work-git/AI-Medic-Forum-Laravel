@@ -25,7 +25,7 @@
         </form>
     </Dialog>
 
-    <template v-if="post.length == 0">
+    <template v-if="post == null">
         <p class="flex justify-center items-center">This post does not exist</p>
     </template>
 
@@ -41,77 +41,57 @@
                 </Button>
             </div>
 
-            <div class="flex flex-row gap-10">
-                <!-- Poster info card -->
-                <UserInfoCard :data="post" />
-
-                <!-- Content -->
-                <Card class="w-full ">
-                    <template #content>
-                        <p class="mb-2">{{ post.description }}</p>
-                    </template>
-                </Card>
-            </div>
+            <ForumContentCard :data="post" type="post" />
         </div>
 
         <Divider align="left" class="py-6">
-            <h2 class="text-2xl font-bold">Comments <Badge :value="comments.total" severity="secondary"/></h2>
+            <h2 class="text-2xl font-bold">Comments <Badge :value="comments?.total" severity="secondary"/></h2>
         </Divider>
 
-        <!-- Comment Section -->
-            <template v-if="loading" class="flex justify-center items-center min-h-screen">
+        <!-- Comment Section : Defer to load later -->
+        <Deferred data="comments">
+            <template #fallback>
                 <ProgressSpinner />
             </template>
 
-            <template v-else-if="comments.data.length > 0">
-                <template v-for="comment in comments.data" :key="comment.comment_id">
-                    <div class="flex flex-row gap-10 mb-4">
-                        <!-- Commenter info card -->
-                        <UserInfoCard :data="comment" />
-
-                        <!-- Content -->
-                        <Card class="w-full">
-                            <template #content>
-                                <p class="mb-2">{{ comment.description }}</p>
-                            </template>
-                        </Card>
-                    </div>
-                </template>
-            </template>
-
-            <template v-else>
+            <template v-if="comments?.total == 0">
                 <p class="flex justify-center items-center">No comments yet.</p>
             </template>
+
+            <div v-else class="flex flex-col gap-4">
+                <template v-for="comment in comments.data" :key="comment.comment_id">
+                    <!-- Content -->
+                    <ForumContentCard :data="comment" type="comment" />
+                </template>
+            </div>
+        </Deferred>
     </template>
 </template>
 
 <script setup>
 // Libraries
-import { onMounted, ref, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
+import { useForm, Deferred } from '@inertiajs/vue3'
 
 // Primevue
 import Badge from 'primevue/badge'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
 import FileUpload from 'primevue/fileupload'
-import Textarea from 'primevue/textarea';
-import ProgressSpinner from 'primevue/progressspinner';
+import Textarea from 'primevue/textarea'
+import ProgressSpinner from 'primevue/progressspinner'
 
 // Primevue Icons
 import Bookmark from '@primeicons/vue/bookmark'
 import BookmarkFill from '@primeicons/vue/bookmark-fill' // will use for bookmarked content, wip
-import Comment from '@primeicons/vue/comment';
+import Comment from '@primeicons/vue/comment'
 
 // Custom Imports
-import UserInfoCard from '@/Components/UserInfoCard.vue'
+import ForumContentCard from '@/Components/ForumContentCard.vue'
 
-const visible = ref(false);
-const props = defineProps({ post: Object })
-const comments = ref([])
-const loading = ref(true)
+const visible = ref(false)
+const props = defineProps({ post: Object, comments: Object })
 
 const form = useForm({
     description: null,
@@ -125,27 +105,9 @@ const onSubmit = () => {
         onSuccess: () => {
             visible.value = false
             form.reset('description', 'img')
-            fetchComments()
         }
     })
 }
-
-const fetchComments = async () => {
-    try {
-        const response = await fetch(`/forum/post/${props.post.post_id}/comments`)
-        if (response.ok) {
-            comments.value = await response.json()
-        }
-    } catch (error) {
-        console.error('Failed to fetch comments:', error)
-    } finally {
-        loading.value = false
-    }
-}
-
-onMounted(() => {
-    fetchComments()
-})
 
 watch(() => props.post, (post) => {
     if (post) {

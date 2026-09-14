@@ -17,7 +17,11 @@ Route::middleware('auth')->group(function () {
 
     // Forum Controller
     Route::post('/forum/post/store', [ForumController::class, 'store_post']);
+    Route::post('/forum/post/{id}/delete', [ForumController::class, 'destroy_post']);
+    Route::post('/forum/post/{id}/update', [ForumController::class, 'update_post']);
     Route::post('/forum/comment/store', [ForumController::class, 'store_comment']);
+    Route::post('/forum/comment/{id}/delete', [ForumController::class, 'destroy_comment']);
+    Route::post('/forum/comment/{id}/update', [ForumController::class, 'update_comment']);
     Route::get('/forum/post/create', [ForumController::class, 'create']);
 });
 

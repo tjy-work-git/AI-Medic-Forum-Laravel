@@ -107,7 +107,8 @@ class ForumController extends Controller
             ->first();
 
         return Inertia::render("Forums/Show", [
-            "post" => $post
+            "post" => $post,
+            "comments" => Inertia::defer(fn() => $this->show_comments($id))
         ]);
     }
 
@@ -121,21 +122,51 @@ class ForumController extends Controller
             ->where('post_id', $id)
             ->paginate(20);
 
-        return response()->json($comments);
+        return $comments;
     }
 
     public function edit(string $id)
     {
-        //
+        // We didnt use this, this is handled by primevue dialog
     }
 
-    public function update(Request $request, string $id)
+    public function update_post(Request $request, string $id)
     {
-        //
+        $validator = $request->validate([
+            'description' => 'required|string'
+        ],[
+            'description.required' => 'Description field cannot be empty.'
+        ]);
+
+        Post::where('post_id', $id)->update(['description' => $validator['description']]);
+
+        return back()->with("success", "Post description has been updated.");
     }
 
-    public function destroy(string $id)
+    public function update_comment(Request $request, string $id)
     {
-        //
+        $validator = $request->validate([
+            'description' => 'required|string'
+        ],[
+            'description.required' => 'Description field cannot be empty.'
+        ]);
+
+        Comment::where('comment_id', $id)->update(['description' => $validator['description']]);
+
+        return back();
+    }
+
+    public function destroy_post(string $id)
+    {
+        Post::destroy($id);
+
+        return redirect('/forum')->with("success", "Post deleted successfully.");
+    }
+
+    public function destroy_comment(string $id)
+    {
+        Comment::destroy($id);
+
+        return back()->with("success","Comment deleted successfully.");
     }
 }

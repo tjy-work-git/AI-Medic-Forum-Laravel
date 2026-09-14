@@ -20,7 +20,10 @@ createInertiaApp({
       .use(plugin)
       .use(PrimeVue, {
         theme: {
-          preset: Aura
+          preset: Aura,
+          options: {
+            darkModeSelector: 'none'
+          }
         }
       })
       .use(ToastService)
