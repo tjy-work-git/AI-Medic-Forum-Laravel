@@ -1,5 +1,6 @@
 <template>
     <Toast />
+    <ConfirmDialog />
     <HeaderLayout v-if="showHeader" />
     <div class="m-4 pb-10">
         <slot />
@@ -11,11 +12,15 @@
 import { watch, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { useToast } from 'primevue/usetoast'
+import { useConfirm } from "primevue/useconfirm";
+
+import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
+
 import HeaderLayout from '@/Layouts/HeaderLayout.vue'
 import FooterLayout from '@/Layouts/FooterLayout.vue'
 
-const page = usePage();
+const page = usePage()
 const toast = useToast()
 const showHeader = computed(() => {
     return page.props.showHeader !== false

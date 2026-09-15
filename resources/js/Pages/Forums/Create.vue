@@ -95,14 +95,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </template>
 
 <script setup>
+// Libraries
 import { useForm } from '@inertiajs/vue3'
 
+// Primevue
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import FileUpload from 'primevue/fileupload'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 
+// Primevue Icons
 import Plus from '@primeicons/vue/plus'
 
 const form = useForm({

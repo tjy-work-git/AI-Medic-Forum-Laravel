@@ -1,5 +1,6 @@
 <template>
     <Avatar
+        class="shrink-0"
         :image="avatarImage"
         shape="circle"
         :pt="{

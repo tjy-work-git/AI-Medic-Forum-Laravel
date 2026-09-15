@@ -76,7 +76,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function show_posts(int $id = null)
+    public function show_posts_history(int $id = null)
     {
         $targetId = $id ?? Auth::id();
 

@@ -4,9 +4,9 @@
             <h1 class="text-4xl font-bold m-4">Post History</h1>
         </template>
         <template #content>
-            <div v-if="loading" class="flex justify-center items-center min-h-screen">
+            <template v-if="loading" class="flex justify-center items-center min-h-screen">
                 <ProgressSpinner />
-            </div>
+            </template>
 
             <template v-else-if="posts.length > 0">
                 <template v-for="post in posts">
@@ -37,11 +37,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+// Libraries
+import { onMounted, ref } from 'vue';
 import { Link } from '@inertiajs/vue3'
 
+// Primevue
 import Card from 'primevue/card';
-
 import ProgressSpinner from 'primevue/progressspinner';
 
 const props = defineProps({
