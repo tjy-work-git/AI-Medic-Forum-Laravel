@@ -60,7 +60,7 @@ class ForumController extends Controller
 
         Post::create($data);
 
-        return redirect()->route("forum")->with("success", "Post created successfully!");
+        return redirect("/forum")->with("success", "Post created successfully!");
     }
 
     public function store_comment(Request $request)
