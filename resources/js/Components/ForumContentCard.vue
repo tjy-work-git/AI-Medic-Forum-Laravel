@@ -51,7 +51,7 @@
 
         <Card class="w-full" :pt="{ body: 'h-full flex flex-col justify-between' }">
             <template #content>
-                <p class="mb-2">{{ data.description }}</p>
+                <p class="mb-2 w-full whitespace-pre-wrap break-words">{{ data.description }}</p>
             </template>
             <template #footer>
                 <Divider />
@@ -63,7 +63,7 @@
                     <Button v-tooltip.top="{ value: 'Report' }" @click="reportDialogVisible = true">
                         <Flag />
                     </Button>
-                    <template v-if="current_user.user_id === data.user_id">
+                    <template v-if="current_user?.user_id === data.user_id">
                         <Button v-tooltip.top="{ value: 'Edit' }" @click="selectEdit(data)">
                             <PenLine />
                         </Button>

@@ -23,7 +23,7 @@
                                 </span>
                             </h3>
                             <p>{{ profile_data.gender }}</p>
-                            <Link v-if="profile_data.user_id === current_user.user_id" href="/user/profile/edit">
+                            <Link v-if="profile_data.user_id === current_user?.user_id" href="/user/profile/edit">
                                 <Button label="Edit Profile" size="small" class="my-4">
                                     <template #icon>
                                         <UserEdit />

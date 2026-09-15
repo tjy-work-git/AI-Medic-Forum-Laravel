@@ -58,7 +58,7 @@ return new class extends Migration
             $table->text('description');
             $table->text('comment_photo')->nullable();
             $table->foreignId('user_id')->constrained('users', 'user_id');
-            $table->foreignId('post_id')->constrained('post', 'post_id');
+            $table->foreignId('post_id')->constrained('post', 'post_id')->onDelete('cascade');
             $table->timestamps();
         });
 

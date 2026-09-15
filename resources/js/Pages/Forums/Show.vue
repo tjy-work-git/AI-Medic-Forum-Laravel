@@ -1,6 +1,6 @@
 <template>
     <!-- Floating comment button - triggers comment dialog-->
-    <Button rounded size="xlarge" @click="visible = true"
+    <Button v-if="current_user" rounded size="xlarge" @click="visible = true"
         style="position: fixed; bottom: 60px; right: 30px; z-index: 100;">
         <template #icon>
             <Comment />
@@ -70,8 +70,8 @@
 
 <script setup>
 // Libraries
-import { ref, watch } from 'vue'
-import { useForm, Deferred } from '@inertiajs/vue3'
+import { computed, ref, watch } from 'vue'
+import { useForm, usePage, Deferred } from '@inertiajs/vue3'
 
 // Primevue
 import Badge from 'primevue/badge'
@@ -92,6 +92,8 @@ import ForumContentCard from '@/Components/ForumContentCard.vue'
 
 const visible = ref(false)
 const props = defineProps({ post: Object, comments: Object })
+const page = usePage()
+const current_user = computed(() => page.props.auth?.current_user)
 
 const form = useForm({
     description: null,

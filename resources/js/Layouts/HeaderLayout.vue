@@ -15,7 +15,7 @@
             <UserAvatar v-else class="cursor-pointer" @click="toggle" :user="current_user" />
             <Popover ref="op">
                 <div class="flex flex-col gap-2">
-                    <p class="font-bold text-l">Welcome, {{ current_user.username }}</p>
+                    <p class="font-bold text-l">Welcome, {{ current_user?.username }}</p>
                     <Divider />
                     <Link href="/user/profile">
                         <Button class="w-full" label="Profile" severity="secondary">
