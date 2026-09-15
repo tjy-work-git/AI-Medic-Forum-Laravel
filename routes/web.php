@@ -29,7 +29,7 @@ Route::inertia('/', 'Index')->name('index'); // requires a name
 Route::inertia('/about-us', 'AboutUs');
 
 // AuthController
-Route::get('/user/login', [AuthController::class, 'get_login']);
+Route::get('/user/login', [AuthController::class, 'get_login'])->name('login');
 Route::get('/user/register', [AuthController::class, 'get_register']);
 Route::get('/user/forgot-password', [AuthController::class, 'get_forgot_password']);
 Route::post('/action/login', [AuthController::class, 'login_auth']);
