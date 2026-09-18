@@ -13,7 +13,10 @@ class ForumController extends Controller
     public function index()
     {
         $data = Post::leftJoin("users", "users.user_id", "post.user_id")
-            ->leftJoin('upvote', 'post.post_id', 'upvote.content_no')
+            ->leftJoin('upvote', function ($join) {
+                $join->on('post.post_id', 'upvote.content_no')
+                    ->where('upvote.content_type', 'post');
+            })
             ->select("post.*", "users.username", "users.user_photo")
             ->selectRaw("COUNT(upvote.content_no) as upvotes")
             ->groupBy("post.post_id", "users.username", "users.user_photo")
@@ -101,7 +104,10 @@ class ForumController extends Controller
         $uid = Auth::id();
 
         $post = Post::leftJoin("users", "users.user_id", "post.user_id")
-            ->leftJoin('upvote', 'post.post_id', 'upvote.content_no')
+            ->leftJoin('upvote', function ($join) {
+                $join->on('post.post_id', 'upvote.content_no')
+                    ->where('upvote.content_type', 'post');
+            })
             ->leftJoin('bookmark', 'post.post_id', 'bookmark.post_id')
             ->select("post.*", "users.username", "users.user_photo")
             ->selectRaw("COUNT(upvote.content_no) as upvotes")
@@ -121,7 +127,10 @@ class ForumController extends Controller
         $uid = Auth::id();
 
         $comments = Comment::leftJoin("users", "users.user_id", "comment.user_id")
-            ->leftJoin('upvote', 'comment.comment_id', 'upvote.content_no')
+            ->leftJoin('upvote', function ($join) {
+                $join->on('comment.comment_id', 'upvote.content_no')
+                    ->where('upvote.content_type', 'comment');
+            })
             ->select("comment.*", "users.username", "users.user_photo")
             ->selectRaw("COUNT(upvote.content_no) as upvotes")
             ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])

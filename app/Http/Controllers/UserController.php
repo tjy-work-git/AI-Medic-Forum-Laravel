@@ -80,7 +80,10 @@ class UserController extends Controller
     {
         $targetId = $id ?? Auth::id();
 
-        $posts = Post::leftJoin('upvote', 'upvote.content_no', 'post.post_id')
+        $posts = Post::leftJoin('upvote', function ($join) {
+            $join->on('upvote.content_no', 'post.post_id')
+                ->where('upvote.content_type', 'post');
+            })
             ->select('post.*')
             ->selectRaw('COALESCE(COUNT(upvote.content_no), 0) as upvote_count')
             ->where('post.user_id', $targetId)
