@@ -12,7 +12,7 @@
         <template #header>
             <h2 class="text-2xl font-bold">Leave a comment</h2>
         </template>
-        <form @submit.prevent="onSubmit()">
+        <form @submit.prevent="onCommentSubmit()">
             <Textarea v-model="form.description" class="w-full" rows="10" autoResize placeholder="Say something..." />
             <div class="flex flex-col">
                 <label for="img">Add Image (optional):</label>
@@ -34,12 +34,13 @@
         <!-- Post Section -->
         <div class="flex flex-col gap-2">
             <div class="flex flex-wrap items-center">
-                <h1 class="text-4xl font-bold my-6">{{ post.title }}</h1>
-                <Button class="mx-6" variant="text" rounded>
+                <Button class="mx-6" variant="text" rounded @click="onBookmarkSubmit">
                     <template #icon>
-                        <Bookmark v-tooltip.bottom="{ value: 'Bookmark' }" />
+                        <BookmarkFill v-if="post.has_bookmarked == 1" v-tooltip.bottom="{ value: 'Remove Bookmark' }"/>
+                        <Bookmark v-else v-tooltip.bottom="{ value: 'Bookmark' }" />
                     </template>
                 </Button>
+                <h1 class="text-4xl font-bold my-6">{{ post.title }}</h1>
             </div>
 
             <ForumContentCard :data="post" type="post" @updated="handleUpdated" />
@@ -72,7 +73,7 @@
 <script setup>
 // Libraries
 import { computed, ref, watch } from 'vue'
-import { useForm, usePage, Deferred } from '@inertiajs/vue3'
+import { useForm, usePage, router } from '@inertiajs/vue3'
 
 // Primevue
 import Badge from 'primevue/badge'
@@ -122,7 +123,7 @@ const handleUpdated = (updated) => {
     }
 }
 
-const onSubmit = () => {
+const onCommentSubmit = () => {
     form.post('/forum/comment/store', {
         preserveScroll: true,
         onSuccess: () => {
@@ -130,6 +131,13 @@ const onSubmit = () => {
             form.reset('description', 'img')
         }
     })
+}
+
+const onBookmarkSubmit = () => {
+    router.post(`/forum/post/${post.value.post_id}/bookmark`), {
+        preserveScroll: true,
+        only: ['flash']
+    }
 }
 
 // Watch for post change + append post ID into comment form (so it knows what post it belong to)

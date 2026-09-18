@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForumController;
-use App\Http\Controllers\UpvoteController;
+use App\Http\Controllers\ActionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +22,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/forum/comment/{id}/delete', [ForumController::class, 'destroy_comment']);
     Route::post('/forum/comment/{id}/update', [ForumController::class, 'update_comment']);
     Route::get('/forum/post/create', [ForumController::class, 'create']);
+
+    // Action Controller
+    Route::post('/forum/post/{id}/upvote', [ActionController::class, 'upvote_post']);
+    Route::post('/forum/comment/{id}/upvote', [ActionController::class, 'upvote_comment']);
+    Route::post('/forum/post/{id}/bookmark', [ActionController::class, 'bookmark']);
 });
 
 Route::inertia('/', 'Index')->name('index'); // requires a name

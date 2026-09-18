@@ -98,12 +98,17 @@ class ForumController extends Controller
 
     public function show_post(string $id)
     {
+        $uid = Auth::id();
+
         $post = Post::leftJoin("users", "users.user_id", "post.user_id")
             ->leftJoin('upvote', 'post.post_id', 'upvote.content_no')
+            ->leftJoin('bookmark', 'post.post_id', 'bookmark.post_id')
             ->select("post.*", "users.username", "users.user_photo")
             ->selectRaw("COUNT(upvote.content_no) as upvotes")
+            ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])
+            ->selectRaw("MAX(CASE WHEN bookmark.user_id = ? THEN 1 ELSE 0 END) AS has_bookmarked", [$uid])
             ->groupBy("post.post_id", "users.username", "users.user_photo")
-            ->where('post_id', $id)
+            ->where('post.post_id', $id)
             ->first();
 
         return Inertia::render("Forums/Show", [
@@ -113,13 +118,16 @@ class ForumController extends Controller
     }
 
     public function show_comments(string $id) {
+        $uid = Auth::id();
+
         $comments = Comment::leftJoin("users", "users.user_id", "comment.user_id")
             ->leftJoin('upvote', 'comment.comment_id', 'upvote.content_no')
             ->select("comment.*", "users.username", "users.user_photo")
             ->selectRaw("COUNT(upvote.content_no) as upvotes")
+            ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])
             ->groupBy("comment.comment_id", "users.username", "users.user_photo")
             ->orderBy("comment.created_at", "asc")
-            ->where('post_id', $id)
+            ->where('comment.post_id', $id)
             ->paginate(20);
 
         return $comments;

@@ -64,7 +64,8 @@
                     <!-- Left side buttons - general functions -->
                     <ButtonGroup class="float-left" @click="onUpvoteSubmit()">
                         <Button variant="text" v-tooltip.top="{ value: 'Upvote' }">
-                            <ThumbsUp />
+                            <ThumbsUpFill v-if="data.has_upvoted == 1" />
+                            <ThumbsUp v-else />
                             {{ data.upvotes }}
                         </Button>
                         <Button variant="text" severity="danger" v-if="current_user?.user_id !== data.user_id" v-tooltip.top="{ value: 'Report' }" @click="reportDialogVisible = true">
@@ -102,7 +103,7 @@ import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 
 import ThumbsUp from '@primeicons/vue/thumbs-up'
-import ThumbsUpFill from '@primeicons/vue/thumbs-up-fill' // will use for upvoted content, wip
+import ThumbsUpFill from '@primeicons/vue/thumbs-up-fill'
 import PenLine from '@primeicons/vue/pen-line'
 import Flag from '@primeicons/vue/flag'
 import Trash from '@primeicons/vue/trash'
@@ -131,13 +132,13 @@ const determineUrl = (type) => {
     switch (type) {
         case 'post':
             return {
-                upvote: `/upvote/post/${props.data.post_id}`,
+                upvote: `/forum/post/${props.data.post_id}/upvote`,
                 update: `/forum/post/${props.data.post_id}/update`,
                 delete: `/forum/post/${props.data.post_id}/delete`
             }
         case 'comment':
             return {
-                upvote: `/upvote/comment/${props.data.comment_id}`,
+                upvote: `/forum/comment/${props.data.comment_id}/upvote`,
                 update: `/forum/comment/${props.data.comment_id}/update`,
                 delete: `/forum/comment/${props.data.comment_id}/delete`
             }
