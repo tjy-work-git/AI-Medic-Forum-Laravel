@@ -34,7 +34,7 @@ watch(
                 toast.add({ severity: 'error', summary: 'Validation Error', detail: msg, life: 3000 })
             })
         }
-        // errors.value = null
+        errors = null
     },
     { immediate: true }
 )
@@ -48,7 +48,7 @@ watch(
         if (flash?.error) {
             toast.add({ severity: 'error', summary: 'Error', detail: flash.error, life: 3000 })
         }
-        // flash.value = null
+        flash = null
     },
     { immediate: true }
 )

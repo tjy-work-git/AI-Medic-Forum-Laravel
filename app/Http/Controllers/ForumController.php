@@ -58,9 +58,9 @@ class ForumController extends Controller
             $data['img'] = $validator['img'];
         }
 
-        Post::create($data);
+        $id = Post::insertGetId($data, 'post_id');
 
-        return redirect("/forum")->with("success", "Post created successfully!");
+        return redirect("/forum/post/{$id}")->with("success", "Post created successfully!");
     }
 
     public function store_comment(Request $request)

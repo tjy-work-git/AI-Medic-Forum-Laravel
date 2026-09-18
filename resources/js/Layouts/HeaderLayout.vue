@@ -71,5 +71,6 @@ const toggle = (event) => {
 
 const logout = () => {
     router.post('/action/logout')
+    op.value.hide()
 }
 </script>
