@@ -25,8 +25,9 @@
         </form>
     </Dialog>
 
+    <!-- Main template -->
     <template v-if="post == null">
-        <p class="flex justify-center items-center">This post does not exist</p>
+        <p class="flex justify-center items-center min-h-[calc(100vh-16rem)]">This post does not exist</p>
     </template>
 
     <template v-else>
@@ -36,35 +37,35 @@
                 <h1 class="text-4xl font-bold my-6">{{ post.title }}</h1>
                 <Button class="mx-6" variant="text" rounded>
                     <template #icon>
-                        <Bookmark v-tooltip.bottom="{ value: 'Bookmark' }"/>
+                        <Bookmark v-tooltip.bottom="{ value: 'Bookmark' }" />
                     </template>
                 </Button>
             </div>
 
-            <ForumContentCard :data="post" type="post" />
+            <ForumContentCard :data="post" type="post" @updated="handleUpdated" />
         </div>
 
         <Divider align="left" class="py-6">
-            <h2 class="text-2xl font-bold">Comments <Badge :value="comments?.total" severity="secondary"/></h2>
+            <h2 class="text-2xl font-bold">Comments
+                <Badge :value="comments?.total ?? 0" severity="secondary" />
+            </h2>
         </Divider>
 
-        <!-- Comment Section : Defer to load later -->
-        <Deferred data="comments">
-            <template #fallback>
-                <ProgressSpinner />
-            </template>
+        <!-- Comment Section : load after post render -->
+        <template v-if="!comments">
+            <ProgressSpinner />
+        </template>
 
-            <template v-if="comments?.total == 0">
-                <p class="flex justify-center items-center">No comments yet.</p>
-            </template>
+        <template v-else-if="comments.length == 0">
+            <p class="flex justify-center items-center min-h-[calc(100vh-40rem)]">No comments yet.</p>
+        </template>
 
-            <div v-else class="flex flex-col gap-4">
-                <template v-for="comment in comments.data" :key="comment.comment_id">
-                    <!-- Content -->
-                    <ForumContentCard :data="comment" type="comment" />
-                </template>
-            </div>
-        </Deferred>
+        <div v-else class="flex flex-col gap-4">
+            <template v-for="comment in comments" :key="comment.comment_id">
+                <!-- Content -->
+                <ForumContentCard :data="comment" type="comment" @deleted="handleDeleted" @updated="handleUpdated" />
+            </template>
+        </div>
     </template>
 </template>
 
@@ -90,9 +91,11 @@ import Comment from '@primeicons/vue/comment'
 // Custom Imports
 import ForumContentCard from '@/Components/ForumContentCard.vue'
 
-const visible = ref(false)
-const props = defineProps({ post: Object, comments: Object })
 const page = usePage()
+const visible = ref(false)
+const post = ref(null)
+const comments = ref([])
+const props = defineProps({ post_data: Object, comments_data: Object })
 const current_user = computed(() => page.props.auth?.current_user)
 
 const form = useForm({
@@ -100,6 +103,24 @@ const form = useForm({
     img: null,
     post_id: null,
 })
+
+// Immediate delete
+const handleDeleted = (commentId) => {
+    comments.value = comments.value.filter(c => c.comment_id !== commentId)
+    if (props.comments_data?.total) props.comments_data.total--
+}
+
+// Immediate update
+const handleUpdated = (updated) => {
+    if (updated.post_id && post.value?.post_id === updated.post_id) {
+        post.value.description = updated.description
+    } else if (updated.comment_id) {
+        const comment = comments.value.find(c => c.comment_id === updated.comment_id)
+        if (comment) {
+            comment.description = updated.description
+        }
+    }
+}
 
 const onSubmit = () => {
     form.post('/forum/comment/store', {
@@ -111,9 +132,19 @@ const onSubmit = () => {
     })
 }
 
-watch(() => props.post, (post) => {
-    if (post) {
-        form.post_id = post.post_id ?? null
+// Watch for post change + append post ID into comment form (so it knows what post it belong to)
+watch(() => props.post_data, (post_data) => {
+    if (post_data) {
+        form.post_id = post_data.post_id ?? null
+        post.value = post_data
     }
 }, { immediate: true })
+
+// Watch for comment changes (update / delete / add)
+watch(() => props.comments_data?.data, (comments_data) => {
+    if (comments_data) {
+        comments.value = [...comments_data]
+    }
+}, { immediate: true })
+
 </script>

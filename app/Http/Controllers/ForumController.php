@@ -58,9 +58,9 @@ class ForumController extends Controller
             $data['img'] = $validator['img'];
         }
 
-        $id = Post::insertGetId($data, 'post_id');
+        $post = Post::create($data);
 
-        return redirect("/forum/post/{$id}")->with("success", "Post created successfully!");
+        return redirect("/forum/post/{$post->post_id}")->with("success", "Post created successfully!");
     }
 
     public function store_comment(Request $request)
@@ -107,8 +107,8 @@ class ForumController extends Controller
             ->first();
 
         return Inertia::render("Forums/Show", [
-            "post" => $post,
-            "comments" => Inertia::defer(fn() => $this->show_comments($id))
+            "post_data" => $post,
+            "comments_data" => Inertia::defer(fn() => $this->show_comments($id))
         ]);
     }
 
@@ -140,7 +140,7 @@ class ForumController extends Controller
 
         Post::where('post_id', $id)->update(['description' => $validator['description']]);
 
-        return back()->with("success", "Post description has been updated.");
+        return back();
     }
 
     public function update_comment(Request $request, string $id)
@@ -167,6 +167,6 @@ class ForumController extends Controller
     {
         Comment::destroy($id);
 
-        return back()->with("success","Comment deleted successfully.");
+        return back()->with("success", "Comment deleted successfully.");
     }
 }

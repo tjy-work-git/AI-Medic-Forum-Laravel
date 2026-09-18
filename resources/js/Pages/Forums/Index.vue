@@ -27,22 +27,19 @@
                     <div class="flex flex-col my-4 gap-2">
                         <div>
                             <label for="searchType">Search by </label>
-                            <Select v-model="searchForm.searchType"
-                                class="w-full"
+                            <Select v-model="searchForm.searchType" class="w-full"
                                 :options="[{ label: 'Post', value: 'post' }, { label: 'User', value: 'user' }]"
                                 optionLabel="label" optionValue="value" />
                         </div>
                         <div>
                             <label for="sortType">Sorting </label>
-                            <Select v-model="searchForm.sortType"
-                                class="w-full"
+                            <Select v-model="searchForm.sortType" class="w-full"
                                 :options="[{ label: 'Latest', value: 'latest' }, { label: 'Alphabetically', value: 'alphabet' }, { label: 'Upvotes', value: 'upvote' }]"
                                 optionLabel="label" optionValue="value" />
                         </div>
                         <div>
                             <label for="sortOrder">Order </label>
-                            <Select v-model="searchForm.sortOrder"
-                                class="w-full"
+                            <Select v-model="searchForm.sortOrder" class="w-full"
                                 :options="[{ label: 'Descending', value: 'desc' }, { label: 'Ascending', value: 'asc' }]"
                                 optionLabel="label" optionValue="value" />
                         </div>
@@ -71,12 +68,13 @@
                                         <h2 class="text-xl font-bold">{{ post.title }}</h2>
                                     </template>
                                     <template #content>
-                                        <p class="mb-2">{{ post.description.substring(0, 100) + "..." }}</p>
+                                        <p class="mb-2">{{ post.description.substring(0, 200) + "..." }}</p>
                                     </template>
                                     <template #footer>
                                         <div class="flex flex-wrap justify-between">
-                                            <p>{{ post.username ?? "[deleted]" }} on {{ post.created_at }}</p>
-                                            <p>{{ post.upvotes }} Upvotes</p>
+                                            <p><b>{{ post.username ?? "[deleted]" }}</b> - {{ post.created_at }}</p>
+                                            <Badge :severity="current_user ? 'secondary' : 'primary'" size="xlarge"
+                                                :value="post.upvotes + ' Upvotes'"></Badge>
                                         </div>
                                     </template>
                                 </Card>
@@ -94,11 +92,12 @@
 import { Link, Deferred, useForm } from '@inertiajs/vue3'
 
 // Primevue
+import Badge from 'primevue/badge'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
-import InputText from 'primevue/inputtext';
-import ProgressSpinner from 'primevue/progressspinner';
-import Select from 'primevue/select';
+import InputText from 'primevue/inputtext'
+import ProgressSpinner from 'primevue/progressspinner'
+import Select from 'primevue/select'
 
 // Primevue Icons
 import Plus from '@primeicons/vue/plus'

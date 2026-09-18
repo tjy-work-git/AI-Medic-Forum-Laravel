@@ -62,22 +62,22 @@
                 </template>
                 <template v-else>
                     <!-- Left side buttons - general functions -->
-                    <ButtonGroup class="float-left" @click="onUpvote()">
+                    <ButtonGroup class="float-left" @click="onUpvoteSubmit()">
                         <Button variant="text" v-tooltip.top="{ value: 'Upvote' }">
                             <ThumbsUp />
                             {{ data.upvotes }}
                         </Button>
-                        <Button variant="text" v-if="current_user?.user_id !== data.user_id" v-tooltip.top="{ value: 'Report' }" @click="reportDialogVisible = true">
+                        <Button variant="text" severity="danger" v-if="current_user?.user_id !== data.user_id" v-tooltip.top="{ value: 'Report' }" @click="reportDialogVisible = true">
                             <Flag />
                         </Button>
                     </ButtonGroup>
                     <!-- Right side buttons - for author of the content-->
                     <ButtonGroup class="float-right">
                         <template v-if="current_user?.user_id === data.user_id">
-                            <Button variant="text" v-tooltip.top="{ value: 'Edit' }" @click="selectEdit(data)">
+                            <Button variant="text" severity="secondary" v-tooltip.top="{ value: 'Edit' }" @click="selectEdit(data)">
                                 <PenLine />
                             </Button>
-                            <Button variant="text" v-tooltip.top="{ value: 'Delete' }" @click="confirmDelete()">
+                            <Button variant="text" severity="danger" v-tooltip.top="{ value: 'Delete' }" @click="confirmDelete()">
                                 <Trash />
                             </Button>
                         </template>
@@ -113,9 +113,10 @@ const confirm = useConfirm()
 const page = usePage()
 const reportDialogVisible = ref(false)
 const editDialogVisible = ref(false)
+const actionURL = ref()
 const current_user = computed(() => page.props.auth?.current_user)
 const props = defineProps({ data: Object, type: String })
-const emit = defineEmits(['deleted'])
+const emit = defineEmits(['deleted', 'updated', 'upvoted']) 
 
 const editForm = useForm({
     description: ''
@@ -126,44 +127,66 @@ const selectEdit = (data) => {
     editDialogVisible.value = true
 }
 
-const onEditSubmit = () => {
-    const updateUrl = computed(() => {
-        switch (props.type) {
-            case 'post':
-                return `/forum/post/${props.data.post_id}/update`
-            case 'comment':
-                return `/forum/comment/${props.data.comment_id}/update`
-        }
-    })
+const determineUrl = (type) => {
+    switch (type) {
+        case 'post':
+            return {
+                upvote: `/upvote/post/${props.data.post_id}`,
+                update: `/forum/post/${props.data.post_id}/update`,
+                delete: `/forum/post/${props.data.post_id}/delete`
+            }
+        case 'comment':
+            return {
+                upvote: `/upvote/comment/${props.data.comment_id}`,
+                update: `/forum/comment/${props.data.comment_id}/update`,
+                delete: `/forum/comment/${props.data.comment_id}/delete`
+            }
+    }
+}
 
-    router.post(updateUrl.value, editForm, {
-        preserveState: true,
+const onEditSubmit = () => {
+    actionURL.value = determineUrl(props.type)
+    router.post(actionURL.value.update, editForm, {
         preserveScroll: true,
+        only: ['flash'],
         onSuccess: () => {
-            emit('updated')
+            emit('updated', {
+                post_id: props.data.post_id ?? null,
+                comment_id: props.data.comment_id ?? null,
+                description: editForm.description
+            })
             editDialogVisible.value = false
         }
     })
 }
 
-const onUpvote = () => {
-    const upvoteUrl = computed(() => {
-        switch (props.type) {
-            case 'post':
-                return `/upvote/post/${props.data.post_id}`
-            case 'comment':
-                return `/upvote/comment/${props.data.comment_id}`
-        }
-    })
-    router.post(upvoteUrl.value, {}, {
-        preserveState: true,
+const onUpvoteSubmit = () => {
+    actionURL.value = determineUrl(props.type)
+    router.post(actionURL.value.upvote, {}, {
         preserveScroll: true,
+        only: [],
         onSuccess: () => {
-            emit('upvoted')
+            emit('upvoted', {
+                post_id: props.data.post_id ?? null,
+                comment_id: props.data.comment_id ?? null,
+            })
         }
     })
 }
 
+const onDeleteSubmit = () => {
+    actionURL.value = determineUrl(props.type)
+    router.post(actionURL.value.delete, {}, {
+        preserveScroll: true,
+        only: ['flash'],
+        onSuccess: () => {
+            // deleting post will wipe everything and redirect - so only comment need this for instant feedback
+            emit('deleted', props.data.comment_id)
+        }
+    })
+}
+
+// For primevue confirm dialog
 const confirmDelete = () => {
     confirm.require({
         message: 'Do you want to delete this content?',
@@ -177,23 +200,7 @@ const confirmDelete = () => {
             label: 'Delete',
             severity: 'danger'
         },
-        accept: () => {
-            const deleteUrl = computed(() => {
-                switch (props.type) {
-                    case 'post':
-                        return `/forum/post/${props.data.post_id}/delete`
-                    case 'comment':
-                        return `/forum/comment/${props.data.comment_id}/delete`
-                }
-            })
-            router.post(deleteUrl.value, {}, {
-                preserveState: true,
-                preserveScroll: true,
-                onSuccess: () => {
-                    emit('deleted')
-                }
-            })
-        },
+        accept: onDeleteSubmit
     });
 };
 </script>
