@@ -1,7 +1,7 @@
 <template>
     <!-- Floating comment button - triggers comment dialog-->
-    <Button v-if="current_user" rounded size="xlarge" @click="visible = true"
-        style="position: fixed; bottom: 60px; right: 30px; z-index: 100;">
+    <Button v-if="current_user" rounded @click="visible = true"
+        style="position: fixed; bottom: 30px; right: 30px; z-index: 100;">
         <template #icon>
             <Comment />
         </template>
@@ -34,7 +34,7 @@
         <!-- Post Section -->
         <div class="flex flex-col gap-2">
             <div class="flex flex-wrap items-center">
-                <Button class="mx-6" variant="text" rounded @click="onBookmarkSubmit">
+                <Button class="mx-6" variant="outlined" rounded @click="onBookmarkSubmit">
                     <template #icon>
                         <BookmarkFill v-if="post.has_bookmarked == 1" v-tooltip.bottom="{ value: 'Remove Bookmark' }"/>
                         <Bookmark v-else v-tooltip.bottom="{ value: 'Bookmark' }" />
@@ -42,15 +42,17 @@
                 </Button>
                 <h1 class="text-4xl font-bold my-6">{{ post.title }}</h1>
             </div>
-
-            <ForumContentCard :data="post" type="post" @updated="handleUpdated" />
         </div>
 
-        <Divider align="left" class="py-6">
-            <h2 class="text-2xl font-bold">Comments
-                <Badge :value="comments?.total ?? 0" severity="secondary" />
-            </h2>
-        </Divider>
+        <ForumContentCard :data="post" type="post" @updated="handleUpdated" />
+
+        <div class="py-3">
+            <Divider align="left">
+                <h2 class="text-2xl font-bold">Comments
+                    <Badge :value="comments?.total ?? 0" severity="secondary" />
+                </h2>
+            </Divider>
+        </div>
 
         <!-- Comment Section : load after post render -->
         <template v-if="!comments">
@@ -66,6 +68,14 @@
                 <!-- Content -->
                 <ForumContentCard :data="comment" type="comment" @deleted="handleDeleted" @updated="handleUpdated" />
             </template>
+        </div>
+
+        <div class="py-12">
+            <Divider align="center">
+                <h2 class="text-xl text-gray-400">
+                    END OF DISCUSSION
+                </h2>
+            </Divider>
         </div>
     </template>
 </template>
@@ -113,13 +123,13 @@ const handleDeleted = (commentId) => {
 
 // Immediate update
 const handleUpdated = (updated) => {
-    if (updated.post_id && post.value?.post_id === updated.post_id) {
-        post.value.description = updated.description
-    } else if (updated.comment_id) {
+    if (updated.comment_id) {
         const comment = comments.value.find(c => c.comment_id === updated.comment_id)
         if (comment) {
             comment.description = updated.description
         }
+    } else if (updated.post_id && post.value?.post_id === updated.post_id) {
+        post.value.description = updated.description
     }
 }
 

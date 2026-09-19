@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForumController;
-use App\Http\Controllers\ActionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,17 +15,13 @@ Route::middleware('auth')->group(function () {
 
     // Forum Controller
     Route::post('/forum/post/store', [ForumController::class, 'store_post']);
-    Route::post('/forum/post/{id}/delete', [ForumController::class, 'destroy_post']);
-    Route::post('/forum/post/{id}/update', [ForumController::class, 'update_post']);
+    Route::post('/forum/post/{id}/bookmark', [ForumController::class, 'bookmark']);
     Route::post('/forum/comment/store', [ForumController::class, 'store_comment']);
-    Route::post('/forum/comment/{id}/delete', [ForumController::class, 'destroy_comment']);
-    Route::post('/forum/comment/{id}/update', [ForumController::class, 'update_comment']);
+    Route::post('/forum/{type}/{id}/delete', [ForumController::class, 'destroy_content']);
+    Route::post('/forum/{type}/{id}/update', [ForumController::class, 'update_content']);
+    Route::post('/forum/{type}/{id}/upvote', [ForumController::class, 'upvote_content']);
+    Route::post('/forum/{type}/{id}/report', [ForumController::class, 'report_content']);
     Route::get('/forum/post/create', [ForumController::class, 'create']);
-
-    // Action Controller
-    Route::post('/forum/post/{id}/upvote', [ActionController::class, 'upvote_post']);
-    Route::post('/forum/comment/{id}/upvote', [ActionController::class, 'upvote_comment']);
-    Route::post('/forum/post/{id}/bookmark', [ActionController::class, 'bookmark']);
 });
 
 Route::inertia('/', 'Index')->name('index'); // requires a name

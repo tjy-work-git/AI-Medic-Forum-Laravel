@@ -18,16 +18,19 @@
         <template #header>
             <h2 class="text-2xl font-bold">{{ type == 'post' ? 'Report post' : 'Report comment' }}</h2>
         </template>
-        <form @submit.prevent="onSubmit()">
-            <Textarea v-model="data.description" class="w-full" rows="10" autoResize placeholder="Say something..." />
+        <form @submit.prevent="onReportSubmit()">
             <p>Provide a reason...</p>
-            <Select v-model="reportForm.searchType"
+            <Select v-model="reportForm.reason"
                 class="w-full"
-                :options="[{ label: 'Post', value: 'post' }, { label: 'User', value: 'user' }]"
+                :options="[
+                    { label: 'Spam', value: 'spam' }, 
+                    { label: 'Profanity', value: 'profanity' },
+                    { label: 'False Information', value: 'false-information' },
+                    { label: 'Other', value: 'other' }]"
                 optionLabel="label" optionValue="value" />
             <div class="flex justify-end gap-2 my-4">
-                <Button severity="secondary" @click="editDialogVisible = false">Cancel</Button>
-                <Button type="submit" label="Save" />
+                <Button severity="secondary" @click="reportDialogVisible = false">Cancel</Button>
+                <Button type="submit" severity="danger" label="Report" />
             </div>
         </form>
     </Dialog>
@@ -62,13 +65,13 @@
                 </template>
                 <template v-else>
                     <!-- Left side buttons - general functions -->
-                    <ButtonGroup class="float-left" @click="onUpvoteSubmit()">
-                        <Button variant="text" v-tooltip.top="{ value: 'Upvote' }">
+                    <ButtonGroup class="float-left">
+                        <Button variant="text" v-tooltip.top="{ value: 'Upvote' }" @click="onUpvoteSubmit()">
                             <ThumbsUpFill v-if="data.has_upvoted == 1" />
                             <ThumbsUp v-else />
                             {{ data.upvotes }}
                         </Button>
-                        <Button variant="text" severity="danger" v-if="current_user?.user_id !== data.user_id" v-tooltip.top="{ value: 'Report' }" @click="reportDialogVisible = true">
+                        <Button variant="text" severity="danger" v-tooltip.top="{ value: 'Report' }" @click="selectReport(data)">
                             <Flag />
                         </Button>
                     </ButtonGroup>
@@ -123,9 +126,18 @@ const editForm = useForm({
     description: ''
 })
 
+const reportForm = useForm({
+    reason: '',
+    opt_description: '',
+})
+
 const selectEdit = (data) => {
     editForm.description = data.description
     editDialogVisible.value = true
+}
+
+const selectReport = (data) => {
+    reportDialogVisible.value = true
 }
 
 const determineUrl = (type) => {
@@ -134,13 +146,15 @@ const determineUrl = (type) => {
             return {
                 upvote: `/forum/post/${props.data.post_id}/upvote`,
                 update: `/forum/post/${props.data.post_id}/update`,
-                delete: `/forum/post/${props.data.post_id}/delete`
+                delete: `/forum/post/${props.data.post_id}/delete`,
+                report: `/forum/post/${props.data.post_id}/report`,
             }
         case 'comment':
             return {
                 upvote: `/forum/comment/${props.data.comment_id}/upvote`,
                 update: `/forum/comment/${props.data.comment_id}/update`,
-                delete: `/forum/comment/${props.data.comment_id}/delete`
+                delete: `/forum/comment/${props.data.comment_id}/delete`,
+                report: `/forum/comment/${props.data.comment_id}/report`,
             }
     }
 }
@@ -152,11 +166,29 @@ const onEditSubmit = () => {
         only: ['flash'],
         onSuccess: () => {
             emit('updated', {
-                post_id: props.data.post_id ?? null,
-                comment_id: props.data.comment_id ?? null,
+                type: props.type,
+                post_id: props.type === 'post' ? props.data.post_id : null,
+                comment_id: props.type === 'comment' ? props.data.comment_id : null,
                 description: editForm.description
             })
             editDialogVisible.value = false
+        }
+    })
+}
+
+const onReportSubmit = () => {
+    actionURL.value = determineUrl(props.type)
+    router.post(actionURL.value.report, reportForm, {
+        preserveScroll: true,
+        only: ['flash'],
+        onSuccess: () => {
+            emit('reported', {
+                type: props.type,
+                post_id: props.type === 'post' ? props.data.post_id : null,
+                comment_id: props.type === 'comment' ? props.data.comment_id : null
+            })
+            reportForm.reset()
+            reportDialogVisible.value = false
         }
     })
 }
@@ -168,8 +200,9 @@ const onUpvoteSubmit = () => {
         only: [],
         onSuccess: () => {
             emit('upvoted', {
-                post_id: props.data.post_id ?? null,
-                comment_id: props.data.comment_id ?? null,
+                type: props.type,
+                post_id: props.type === 'post' ? props.data.post_id : null,
+                comment_id: props.type === 'comment' ? props.data.comment_id : null,
             })
         }
     })

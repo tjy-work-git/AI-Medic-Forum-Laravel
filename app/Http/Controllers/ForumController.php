@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
+use App\Models\Bookmark;
 use App\Models\Comment;
+use App\Models\Post;
+use App\Models\Report;
+use App\Models\Upvote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -120,7 +123,7 @@ class ForumController extends Controller
         return Inertia::render("Forums/Show", [
             "post_data" => $post,
             "comments_data" => Inertia::defer(fn() => $this->show_comments($id))
-        ]);
+        ])->with('showFooter', false);
     }
 
     public function show_comments(string $id) {
@@ -142,12 +145,7 @@ class ForumController extends Controller
         return $comments;
     }
 
-    public function edit(string $id)
-    {
-        // We didnt use this, this is handled by primevue dialog
-    }
-
-    public function update_post(Request $request, string $id)
+    public function update_content(Request $request, string $type, string $id)
     {
         $validator = $request->validate([
             'description' => 'required|string'
@@ -155,35 +153,84 @@ class ForumController extends Controller
             'description.required' => 'Description field cannot be empty.'
         ]);
 
-        Post::where('post_id', $id)->update(['description' => $validator['description']]);
+        if ($type == 'post') {
+            Post::where('post_id', $id)->update(['description' => $validator['description']]);
+        } else if ($type == 'comment') {
+            Comment::where('comment_id', $id)->update(['description' => $validator['description']]);
+        } else {
+            return back()->with('error', 'Action invalid: Content type invalid / not specified');
+        }
 
         return back();
     }
 
-    public function update_comment(Request $request, string $id)
+    public function destroy_content(string $type, string $id)
     {
-        $validator = $request->validate([
-            'description' => 'required|string'
-        ],[
-            'description.required' => 'Description field cannot be empty.'
-        ]);
+        switch ($type) {
+            case 'post':
+                Post::destroy($id);
+                return redirect('/forum')->with("success", "Post deleted successfully.");
+            case 'comment':
+                Comment::destroy($id);
+                return back()->with("success", "Comment deleted successfully.");
+            default:
+                return back()->with('error', 'Action invalid: Content type invalid / specified');
+        }
+    }
 
-        Comment::where('comment_id', $id)->update(['description' => $validator['description']]);
+    public function upvote_content(string $type, string $id)
+    {
+        if ($type !== 'post' && $type !== 'comment') {
+            return back()->with('error', 'Action invalid: Content type invalid / not specified');
+        }
 
+        $upvote = Upvote::where("content_no", $id)
+            ->where('content_type', $type)
+            ->where("user_id", Auth::id())
+            ->first();
+        if ($upvote) {
+            Upvote::where("content_no", $id)
+                ->where('content_type', $type)
+                ->where("user_id", Auth::id())
+                ->delete();
+        } else {
+            Upvote::create([
+                "content_no" => $id,
+                "content_type" => $type,
+                "user_id" => Auth::id(),
+            ]);
+        }
         return back();
     }
 
-    public function destroy_post(string $id)
+    public function bookmark(string $id)
     {
-        Post::destroy($id);
-
-        return redirect('/forum')->with("success", "Post deleted successfully.");
+        $upvote = Bookmark::where("post_id", $id)
+            ->where("user_id", Auth::id())
+            ->first();
+        if ($upvote) {
+            Bookmark::where("post_id", $id)
+                ->where("user_id", Auth::id())
+                ->delete();
+            $message = 'You have removed this post from your bookmark.';
+        } else {
+            Bookmark::create([
+                "post_id" => $id,
+                "user_id" => Auth::id(),
+            ]);
+            $message = 'You have added this post to your bookmark. Revisit them later in Bookmark.';
+        }
+        return back()->with('success', $message);
     }
 
-    public function destroy_comment(string $id)
+    public function report_content(Request $request, string $type, string $id)
     {
-        Comment::destroy($id);
+        if ($type !== 'post' && $type !== 'comment') {
+            return back()->with('error', 'Action invalid: Content type invalid / not specified');
+        }
 
-        return back()->with("success", "Comment deleted successfully.");
+        // TODO: implement report store
+
+        return back()->with('success', 'Content reported. Your report will be processed soon.');
     }
 }
