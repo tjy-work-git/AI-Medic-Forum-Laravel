@@ -112,6 +112,7 @@ class UserController extends Controller
         $rules = [
             'username' => ['required', 'string'],
             'bio' => ['nullable', 'string'],
+            'user_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'gender' => ['required', 'in:Male,Female'],
             'password_change' => ['nullable', 'boolean'],
             'enable_auth' => ['nullable', 'boolean'],
@@ -120,6 +121,9 @@ class UserController extends Controller
         $messages = [
             'username.required' => 'Username is a required field.',
             'gender.required' => 'Gender is a required field.',
+            'user_photo.file' => 'Image must be a file.',
+            'user_photo.mimes' => 'Image must be a valid image format.',
+            'user_photo.max' => 'Image must be less than 2MB.',
         ];
 
         // Enable rules if email change is enabled
@@ -150,6 +154,12 @@ class UserController extends Controller
             'gender'       => $validator['gender'],
             'enabled_auth' => $validator['enable_auth'] ?? false,
         ];
+
+        if (!empty($validator['user_photo'])) {
+            $filename = time()."-".Auth::id()."." . "jpg";
+            $path = $request->file('user_photo')->storeAs('uploads/profile', $filename, 'public');
+            $data['user_photo'] = $path;
+        }
 
         // Only include this if the email change is enabled
         if (!empty($validator['email'])) {

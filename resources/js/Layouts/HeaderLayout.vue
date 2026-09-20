@@ -1,7 +1,7 @@
 <template>
     <header :style="{ backgroundImage: `url(${bgUrl})` }">
         <Link href="/">
-            <img :src="logoUrl" alt="WeDoCare - AI Assisted Forums" class="h-24">
+            <Image :src="logoUrl" alt="WeDoCare - AI Assisted Forums" width="200"/>
         </Link>
     </header>
     <Menubar :model="items" class="flex flex-row bg-black gap-4 p-2 m-4 text-white">
@@ -42,6 +42,7 @@ import { router } from '@inertiajs/vue3'
 
 import Button from 'primevue/button'
 import Divider from 'primevue/divider'
+import Image from 'primevue/image'
 import Menubar from 'primevue/menubar'
 import Popover from 'primevue/popover'
 
@@ -49,8 +50,8 @@ import User from '@primeicons/vue/user'
 import SignOut from '@primeicons/vue/sign-out'
 
 import UserAvatar from '@/Components/UserAvatar.vue'
-import logoUrl from '../../images/static/wedocare_logo.png'
-import bgUrl from '../../images/static/bg.jpg'
+import logoUrl from '/resources/images/static/wedocare_logo.png'
+import bgUrl from '/resources/images/static/bg.jpg'
 
 const page = usePage()
 const op = ref();

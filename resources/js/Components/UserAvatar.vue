@@ -19,17 +19,30 @@ const page = usePage()
 
 const props = defineProps({
     size: String,
-    size_value: Number,
     user: Object,
     img: String,
 })
 
 const resolvedSize = computed(() => {
-    const val = props.size ?? props.size_value ?? 40
+    const val = props.size ?? 40
     return typeof val === 'number' ? `${val}px` : (val.endsWith('px') ? val : `${val}px`)
 })
 
 const avatarImage = computed(() => {
-    return props.img ?? props.user?.user_photo ?? page.props.auth.user?.user_photo ?? 'https://placehold.co/100x100'
+    const photo = props.img ?? props.user?.user_photo ?? page.props.auth?.current_user?.user_photo ?? page.props.auth?.user?.user_photo
+
+    if (!photo) {
+        return 'https://placehold.co/100x100'
+    }
+
+    if (photo.startsWith('http://') || photo.startsWith('https://')) {
+        return photo
+    }
+
+    if (photo.startsWith('/storage/')) {
+        return photo
+    }
+
+    return `/storage/${photo.replace(/^\/+/, '')}`
 })
 </script>

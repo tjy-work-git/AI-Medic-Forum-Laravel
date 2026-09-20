@@ -55,6 +55,9 @@
                 <p class="mb-2 w-full whitespace-pre-wrap break-words">{{ data.description }}</p>
             </template>
             <template #footer>
+                <div class="p-6 rounded-lg" v-if="data.post_photo || data.comment_photo">
+                    <Image :src="`/storage/${data.post_photo ?? data.comment_photo}`" width="200" preview />
+                </div>
                 <Divider />
                 <template v-if="!current_user">
                     <!-- Simple upvote display -->
@@ -102,6 +105,7 @@ import ButtonGroup from 'primevue/buttongroup'
 import Card from 'primevue/card'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
+import Image from 'primevue/image'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 

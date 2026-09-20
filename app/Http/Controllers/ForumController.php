@@ -9,22 +9,28 @@ use App\Models\Report;
 use App\Models\Upvote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Exception;
 use Inertia\Inertia;
 
 class ForumController extends Controller
 {
     public function index()
     {
-        $data = Post::leftJoin("users", "users.user_id", "post.user_id")
-            ->leftJoin('upvote', function ($join) {
-                $join->on('post.post_id', 'upvote.content_no')
-                    ->where('upvote.content_type', 'post');
-            })
-            ->select("post.*", "users.username", "users.user_photo")
-            ->selectRaw("COUNT(upvote.content_no) as upvotes")
-            ->groupBy("post.post_id", "users.username", "users.user_photo")
-            ->orderBy("post.created_at", "desc")
-            ->paginate(10);
+        try {
+            $data = Post::leftJoin("users", "users.user_id", "post.user_id")
+                ->leftJoin('upvote', function ($join) {
+                    $join->on('post.post_id', 'upvote.content_no')
+                        ->where('upvote.content_type', 'post');
+                })
+                ->select("post.*", "users.username", "users.user_photo")
+                ->selectRaw("COUNT(upvote.content_no) as upvotes")
+                ->groupBy("post.post_id", "users.username", "users.user_photo")
+                ->orderBy("post.created_at", "desc")
+                ->paginate(10);
+        } catch (Exception $e) {
+            return abort(500);
+        }
 
         return Inertia::render("Forums/Index", [
             "posts" => Inertia::defer(fn() => $data)
@@ -41,30 +47,37 @@ class ForumController extends Controller
         $rules = [
             'title' => ['required', 'string'],
             'description' => ['required', 'string'],
-            'img' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'post_photo' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ];
 
         $messages = [
             'title.required' => 'Please enter a title.',
             'description.required' => 'Please fill in the descriptions.',
-            'img.file' => 'Image must be a file.',
-            'img.mimes' => 'Image must be a valid image format.',
-            'img.max' => 'Image must be less than 2MB.',
+            'post_photo.file' => 'Image must be a file.',
+            'post_photo.mimes' => 'Image must be a valid image format.',
+            'post_photo.max' => 'Image must be less than 2MB.',
         ];
 
         $validator = $request->validate($rules, $messages);
 
-        $data = [
-            'title' => $validator['title'],
-            'description' => $validator['description'],
-            'user_id' => Auth::id(),
-        ];
+        try {
+            $data = [
+                'title' => $validator['title'],
+                'description' => $validator['description'],
+                'user_id' => Auth::id(),
+            ];
 
-        if (!empty($validator['img'])) {
-            $data['img'] = $validator['img'];
+            if (!empty($validator['post_photo'])) {
+                $filename = "post-" . time() . "-" . Auth::id() . "-" . $request->file('post_photo')->getClientOriginalName();
+                $path = $request->file('post_photo')->storeAs('uploads/forum', $filename, 'public');
+                $data['post_photo'] = $path;
+            }
+
+            $post = Post::create($data);
+
+        } catch (Exception $e) {
+            return abort(500);
         }
-
-        $post = Post::create($data);
 
         return redirect("/forum/post/{$post->post_id}")->with("success", "Post created successfully!");
     }
@@ -73,52 +86,67 @@ class ForumController extends Controller
     {
         $rules = [
             'description' => ['required', 'string'],
-            'img' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'comment_photo' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'post_id' => ['required', 'exists:post,post_id']
         ];
 
         $messages = [
             'description.required' => 'Please fill in the descriptions.',
             'post_id.exists' => 'Invalid post ID within the form.',
-            'img.file' => 'Image must be a file.',
-            'img.mimes' => 'Image must be a valid image format.',
-            'img.max' => 'Image must be less than 2MB.',
+            'comment_photo.file' => 'Image must be a file.',
+            'comment_photo.mimes' => 'Image must be a valid image format.',
+            'comment_photo.max' => 'Image must be less than 2MB.',
         ];
 
         $validator = $request->validate($rules, $messages);
 
-        $data = [
-            'description' => $validator['description'],
-            'user_id' => Auth::id(),
-            'post_id' => $validator['post_id'],
-        ];
+        try {
+            $data = [
+                'description' => $validator['description'],
+                'user_id' => Auth::id(),
+                'post_id' => $validator['post_id'],
+            ];
 
-        if (!empty($validator['img'])) {
-            $data['img'] = $validator['img'];
+            if (!empty($validator['comment_photo'])) {
+                $filename = "comment-" . time() . "-" . Auth::id() . "." . $request->file('comment_photo')->getClientOriginalExtension();
+                $path = $request->file('comment_photo')->storeAs('uploads/forum', $filename, 'public');
+                $data['comment_photo'] = $path;
+            }
+
+            Comment::create($data);
+
+        } catch (Exception $e) {
+            return abort(500);
         }
 
-        Comment::create($data);
-
-        return back();
+        return back()->with("success", "Comment created successfully!");
     }
 
     public function show_post(string $id)
     {
         $uid = Auth::id();
 
-        $post = Post::leftJoin("users", "users.user_id", "post.user_id")
-            ->leftJoin('upvote', function ($join) {
-                $join->on('post.post_id', 'upvote.content_no')
-                    ->where('upvote.content_type', 'post');
-            })
-            ->leftJoin('bookmark', 'post.post_id', 'bookmark.post_id')
-            ->select("post.*", "users.username", "users.user_photo")
-            ->selectRaw("COUNT(upvote.content_no) as upvotes")
-            ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])
-            ->selectRaw("MAX(CASE WHEN bookmark.user_id = ? THEN 1 ELSE 0 END) AS has_bookmarked", [$uid])
-            ->groupBy("post.post_id", "users.username", "users.user_photo")
-            ->where('post.post_id', $id)
-            ->first();
+        try {
+            $post = Post::leftJoin("users", "users.user_id", "post.user_id")
+                ->leftJoin('upvote', function ($join) {
+                    $join->on('post.post_id', 'upvote.content_no')
+                        ->where('upvote.content_type', 'post');
+                })
+                ->leftJoin('bookmark', 'post.post_id', 'bookmark.post_id')
+                ->select("post.*", "users.username", "users.user_photo")
+                ->selectRaw("COUNT(upvote.content_no) as upvotes")
+                ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])
+                ->selectRaw("MAX(CASE WHEN bookmark.user_id = ? THEN 1 ELSE 0 END) AS has_bookmarked", [$uid])
+                ->groupBy("post.post_id", "users.username", "users.user_photo")
+                ->where('post.post_id', $id)
+                ->first();
+        } catch (Exception $e) {
+            return abort(500);
+        }
+
+        if (!$post) {
+            return abort(404);
+        }
 
         return Inertia::render("Forums/Show", [
             "post_data" => $post,
@@ -126,21 +154,26 @@ class ForumController extends Controller
         ])->with('showFooter', false);
     }
 
-    public function show_comments(string $id) {
+    public function show_comments(string $id)
+    {
         $uid = Auth::id();
 
-        $comments = Comment::leftJoin("users", "users.user_id", "comment.user_id")
-            ->leftJoin('upvote', function ($join) {
-                $join->on('comment.comment_id', 'upvote.content_no')
-                    ->where('upvote.content_type', 'comment');
-            })
-            ->select("comment.*", "users.username", "users.user_photo")
-            ->selectRaw("COUNT(upvote.content_no) as upvotes")
-            ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])
-            ->groupBy("comment.comment_id", "users.username", "users.user_photo")
-            ->orderBy("comment.created_at", "asc")
-            ->where('comment.post_id', $id)
-            ->paginate(20);
+        try {
+            $comments = Comment::leftJoin("users", "users.user_id", "comment.user_id")
+                ->leftJoin('upvote', function ($join) {
+                    $join->on('comment.comment_id', 'upvote.content_no')
+                        ->where('upvote.content_type', 'comment');
+                })
+                ->select("comment.*", "users.username", "users.user_photo")
+                ->selectRaw("COUNT(upvote.content_no) as upvotes")
+                ->selectRaw("MAX(CASE WHEN upvote.user_id = ? THEN 1 ELSE 0 END) AS has_upvoted", [$uid])
+                ->groupBy("comment.comment_id", "users.username", "users.user_photo")
+                ->orderBy("comment.created_at", "asc")
+                ->where('comment.post_id', $id)
+                ->paginate(20);
+        } catch (Exception $e) {
+            return abort(500);
+        }
 
         return $comments;
     }
@@ -149,7 +182,7 @@ class ForumController extends Controller
     {
         $validator = $request->validate([
             'description' => 'required|string'
-        ],[
+        ], [
             'description.required' => 'Description field cannot be empty.'
         ]);
 
@@ -181,45 +214,54 @@ class ForumController extends Controller
     public function upvote_content(string $type, string $id)
     {
         if ($type !== 'post' && $type !== 'comment') {
-            return back()->with('error', 'Action invalid: Content type invalid / not specified');
+            return abort(400);
         }
 
-        $upvote = Upvote::where("content_no", $id)
-            ->where('content_type', $type)
-            ->where("user_id", Auth::id())
-            ->first();
-        if ($upvote) {
-            Upvote::where("content_no", $id)
+        try {
+            $upvote = Upvote::where("content_no", $id)
                 ->where('content_type', $type)
                 ->where("user_id", Auth::id())
-                ->delete();
-        } else {
-            Upvote::create([
-                "content_no" => $id,
-                "content_type" => $type,
-                "user_id" => Auth::id(),
-            ]);
+                ->first();
+            if ($upvote) {
+                Upvote::where("content_no", $id)
+                    ->where('content_type', $type)
+                    ->where("user_id", Auth::id())
+                    ->delete();
+            } else {
+                Upvote::create([
+                    "content_no" => $id,
+                    "content_type" => $type,
+                    "user_id" => Auth::id(),
+                ]);
+            }
+            return back();
+        } catch (Exception $e) {
+            return abort(500);
         }
-        return back();
     }
 
     public function bookmark(string $id)
     {
-        $upvote = Bookmark::where("post_id", $id)
-            ->where("user_id", Auth::id())
-            ->first();
-        if ($upvote) {
-            Bookmark::where("post_id", $id)
+        try {
+            $upvote = Bookmark::where("post_id", $id)
                 ->where("user_id", Auth::id())
-                ->delete();
-            $message = 'You have removed this post from your bookmark.';
-        } else {
-            Bookmark::create([
-                "post_id" => $id,
-                "user_id" => Auth::id(),
-            ]);
-            $message = 'You have added this post to your bookmark. Revisit them later in Bookmark.';
+                ->first();
+            if ($upvote) {
+                Bookmark::where("post_id", $id)
+                    ->where("user_id", Auth::id())
+                    ->delete();
+                $message = 'You have removed this post from your bookmark.';
+            } else {
+                Bookmark::create([
+                    "post_id" => $id,
+                    "user_id" => Auth::id(),
+                ]);
+                $message = 'You have added this post to your bookmark. Revisit them later in Bookmark.';
+            }
+        } catch (Exception $e) {
+            return abort(500);
         }
+        
         return back()->with('success', $message);
     }
 

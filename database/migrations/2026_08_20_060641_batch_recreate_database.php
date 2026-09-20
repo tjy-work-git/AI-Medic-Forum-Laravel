@@ -49,7 +49,7 @@ return new class extends Migration
 
         Schema::create('bookmark', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users', 'user_id');
-            $table->foreignId('post_id')->constrained('post', 'post_id');
+            $table->foreignId('post_id')->constrained('post', 'post_id')->onDelete('cascade');
             $table->timestamps();
         });
 

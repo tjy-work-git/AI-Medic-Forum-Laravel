@@ -72,7 +72,7 @@
                                     </template>
                                     <template #footer>
                                         <div class="flex flex-wrap justify-between">
-                                            <p><b>{{ post.username ?? "[deleted]" }}</b> - {{ post.created_at }}</p>
+                                            <p><b>{{ post.username ?? "[deleted]" }}</b> | {{ post.created_at }}</p>
                                             <Badge :severity="current_user ? 'secondary' : 'primary'" size="xlarge"
                                                 :value="post.upvotes + ' Upvotes'"></Badge>
                                         </div>

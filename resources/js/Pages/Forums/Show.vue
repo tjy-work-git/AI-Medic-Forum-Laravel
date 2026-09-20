@@ -13,10 +13,10 @@
             <h2 class="text-2xl font-bold">Leave a comment</h2>
         </template>
         <form @submit.prevent="onCommentSubmit()">
-            <Textarea v-model="form.description" class="w-full" rows="10" autoResize placeholder="Say something..." />
-            <div class="flex flex-col">
-                <label for="img">Add Image (optional):</label>
-                <FileUpload v-model="form.img" chooselabel="Browse" accept="image/*" />
+            <Textarea v-model="commentForm.description" class="w-full" rows="10" autoResize placeholder="Say something..." />
+            <div class="flex flex-col py-2 gap-2">
+                <label for="comment_photo"><b>Add Image</b> <span class="text-sm">(optional)</span></label>
+                <FileUpload @select="(event) => commentForm.comment_photo = event.files[0]" mode="basic" chooseLabel="Browse" accept="image/*" />
             </div>
             <div class="flex justify-end gap-2 my-4">
                 <Button severity="secondary" @click="visible = false">Cancel</Button>
@@ -27,7 +27,9 @@
 
     <!-- Main template -->
     <template v-if="post == null">
-        <p class="flex justify-center items-center min-h-[calc(100vh-16rem)]">This post does not exist</p>
+         <div class="flex flex-col gap-4 justify-center items-center min-h-[calc(100vh-16rem)]">
+            <p class="text-2xl">This post does not exist</p>
+         </div>
     </template>
 
     <template v-else>
@@ -91,6 +93,7 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
 import FileUpload from 'primevue/fileupload'
+import Image from 'primevue/image'
 import Textarea from 'primevue/textarea'
 import ProgressSpinner from 'primevue/progressspinner'
 
@@ -109,9 +112,9 @@ const comments = ref([])
 const props = defineProps({ post_data: Object, comments_data: Object })
 const current_user = computed(() => page.props.auth?.current_user)
 
-const form = useForm({
+const commentForm = useForm({
     description: null,
-    img: null,
+    comment_photo: null,
     post_id: null,
 })
 
@@ -134,11 +137,11 @@ const handleUpdated = (updated) => {
 }
 
 const onCommentSubmit = () => {
-    form.post('/forum/comment/store', {
+    commentForm.post('/forum/comment/store', {
         preserveScroll: true,
         onSuccess: () => {
             visible.value = false
-            form.reset('description', 'img')
+            commentForm.reset('description', 'comment_photo')
         }
     })
 }
@@ -153,7 +156,7 @@ const onBookmarkSubmit = () => {
 // Watch for post change + append post ID into comment form (so it knows what post it belong to)
 watch(() => props.post_data, (post_data) => {
     if (post_data) {
-        form.post_id = post_data.post_id ?? null
+        commentForm.post_id = post_data.post_id ?? null
         post.value = post_data
     }
 }, { immediate: true })
