@@ -7,6 +7,14 @@
         </template>
     </Button>
 
+    <!-- Floating summary button, for now sends a request for testing (will add dialog soon) -->
+    <Button v-if="current_user" rounded @click="onSummarySubmit" variant="outlined"
+        style="position: fixed; bottom: 90px; right: 30px; z-index: 100;">
+        <template #icon>
+            <Sparkles />
+        </template>
+    </Button>
+
     <!-- Comment Dialog -->
     <Dialog v-model:visible="visible" class="w-1/2" modal>
         <template #header>
@@ -93,14 +101,14 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
 import FileUpload from 'primevue/fileupload'
-import Image from 'primevue/image'
 import Textarea from 'primevue/textarea'
 import ProgressSpinner from 'primevue/progressspinner'
 
 // Primevue Icons
 import Bookmark from '@primeicons/vue/bookmark'
-import BookmarkFill from '@primeicons/vue/bookmark-fill' // will use for bookmarked content, wip
+import BookmarkFill from '@primeicons/vue/bookmark-fill'
 import Comment from '@primeicons/vue/comment'
+import Sparkles from '@primeicons/vue/sparkles'
 
 // Custom Imports
 import ForumContentCard from '@/Components/ForumContentCard.vue'
@@ -148,6 +156,13 @@ const onCommentSubmit = () => {
 
 const onBookmarkSubmit = () => {
     router.post(`/forum/post/${post.value.post_id}/bookmark`), {
+        preserveScroll: true,
+        only: ['flash']
+    }
+}
+
+const onSummarySubmit = () => {
+    router.post(`/forum/summarize/${post.value.post_id}`), {
         preserveScroll: true,
         only: ['flash']
     }

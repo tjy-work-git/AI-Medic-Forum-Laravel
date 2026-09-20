@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\OpenAIController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/forum/{type}/{id}/upvote', [ForumController::class, 'upvote_content']);
     Route::post('/forum/{type}/{id}/report', [ForumController::class, 'report_content']);
     Route::get('/forum/post/create', [ForumController::class, 'create']);
+
+    // OpenAIController
+    Route::post('forum/summarize/{id}', [OpenAIController::class, 'summarize']);
 });
 
 Route::inertia('/', 'Index')->name('index'); // requires a name

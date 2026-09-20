@@ -9,7 +9,6 @@ use App\Models\Report;
 use App\Models\Upvote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Exception;
 use Inertia\Inertia;
 
