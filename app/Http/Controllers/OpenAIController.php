@@ -7,53 +7,47 @@ use App\Models\Post;
 use DOMDocument;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use OpenAI;
 
 class OpenAIController extends Controller
 {
     public function summarize(Request $request, string $id)
     {
-        if (!$id) {
-            return back()->with('errors', 'Action invalid');
+        if (!$id || !$request->preference) {
+            return back()->with('errors', 'Action aborted');
         }
         $data = $this->data_query($id);
 
+        // prepare prompt instructions
+        $prompt = match ($request->preference) {
+            '1' => "Summarize these in general : ",
+            '2' => "Summarize these abstractively (in general concept):",
+            '3' => "Summarize these extractively (extract main point):",
+        };
         // prepare openai
         try {
+            $input = "$prompt\n{$data['data']}\n{$data['ext_content']}";
+            $prompt_instructions = File::get(resource_path('prompt_instructions.txt')); // customize the instructions in the file imported
             $client = OpenAI::client(env('OPENAI_API_KEY'));
-        } catch (Exception $e) {
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o',
+                'messages' => [
+                    ['role' => 'system', 'content' => $prompt_instructions],
+                    ['role' => 'user', 'content' => $input]
+                ],
+                'temperature' => 0.5,
+                'max_tokens' => 1000,
+            ]);
+        }catch (Exception $e) {
             return back()->with('errors', 'Summarization feature temporarily unavailable. Please try again soon');
         }
-
-        $prompt = match ($request->mode) {
-            'abstract' => "Summarize these abstractively (in general concept):",
-            'extract' => "Summarize these extractively (extract main point):",
-            'general' => "Summarize these in general : ",
-            default => "Summarize:"
-        };
-
-        $input = "$prompt\n{$data['data']}\n{$data['ext_content']}";
-
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a helpful summary assistant for WeDoCare forum about medical topics. '
-                    . 'Assume the user are medical patients, provide them the necessary information summary based on the input.'
-                    . 'Format your answers using HTML (e.g., <b>, <i>, <ul>, <li>, <p>) where appropriate. '
-                    . 'Return "Summary are not available at the moment." if the topics are unrelated to medical topics,'
-                    . 'or not enough content to generate a helpful summary with answers.'
-                    . 'Perform cross reference between online source and the discussion to validate the information.'
-                    . 'If any web links is provided, include them at the end of the summary as a reference.'
-                    . 'Encourage users to read the web link if summarize on the link cannot be done.'
-                    . 'Notify users if inconsistency is spotted.'],
-                ['role' => 'user', 'content' => $input]
-            ],
-            'temperature' => 0.5,
-            'max_tokens' => 1000,
+        
+        $summary = $response['choices'][0]['message']['content'];
+        
+        return response()->json([
+            'summary' => $summary
         ]);
-
-        // change soon
-        return $response['choices'][0]['message']['content'];
     }
 
     private function data_query(string $id)

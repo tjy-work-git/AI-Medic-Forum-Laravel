@@ -118,7 +118,7 @@ class ForumController extends Controller
             return abort(500);
         }
 
-        return back()->with("success", "Comment created successfully!");
+        return back();
     }
 
     public function show_post(string $id)
