@@ -3,11 +3,11 @@
         <div class="w-full">
             <div class="flex flex-row">
                 <div class="flex flex-col justify-center m-10 w-max-200">
-                    <UserAvatar :size="100" :img="data.user_photo" />
                     <Link :href="`/user/profile/${data.user_id}`">
+                        <UserAvatar :size="100" :img="data.user_photo" />
                         <p class="text-xl font-bold">{{ data.username ?? "[deleted]" }}</p>
                     </Link>
-                    {{ data.created_at }}
+                    <p><Clock /> {{ data.created_at }}</p>
                 </div>
                 <Card class="w-full border" :pt="{ body: 'h-full flex flex-col justify-between' }">
                     <template #content>
@@ -18,40 +18,31 @@
                             <Image :src="`/storage/${data.post_photo ?? data.comment_photo}`" width="200" preview />
                         </div>
                         <Divider />
-                        <template v-if="!current_user">
-                            <!-- Simple upvote display -->
-                            <div class="secondary">
-                                <ThumbsUp />
+                        <!-- Left side buttons - general functions -->
+                        <ButtonGroup class="float-left" :disabled="!current_user">
+                            <Button variant="text" v-tooltip.top="{ value: 'Upvote' }" @click="onUpvoteSubmit()">
+                                <ThumbsUpFill v-if="data.has_upvoted == 1" />
+                                <ThumbsUp v-else />
                                 {{ data.upvotes }}
-                            </div>
-                        </template>
-                        <template v-else>
-                            <!-- Left side buttons - general functions -->
-                            <ButtonGroup class="float-left">
-                                <Button variant="text" v-tooltip.top="{ value: 'Upvote' }" @click="onUpvoteSubmit()">
-                                    <ThumbsUpFill v-if="data.has_upvoted == 1" />
-                                    <ThumbsUp v-else />
-                                    {{ data.upvotes }}
+                            </Button>
+                            <Button variant="text" severity="danger" v-tooltip.top="{ value: 'Report' }"
+                                @click="emit('report-requested', { data: data, type: type })">
+                                <Flag />
+                            </Button>
+                        </ButtonGroup>
+                        <!-- Right side buttons - for author of the content -->
+                        <ButtonGroup class="float-right" :disabled="!current_user">
+                            <template v-if="current_user?.user_id === data.user_id">
+                                <Button variant="text" severity="secondary" v-tooltip.top="{ value: 'Edit' }"
+                                    @click="emit('edit-requested', { data: data, type: type })">
+                                    <PenLine />
                                 </Button>
-                                <Button variant="text" severity="danger" v-tooltip.top="{ value: 'Report' }"
-                                    @click="emit('report-requested', { data: data, type: type })">
-                                    <Flag />
+                                <Button variant="text" severity="danger" v-tooltip.top="{ value: 'Delete' }"
+                                    @click="confirmDelete()">
+                                    <Trash />
                                 </Button>
-                            </ButtonGroup>
-                            <!-- Right side buttons - for author of the content -->
-                            <ButtonGroup class="float-right">
-                                <template v-if="current_user?.user_id === data.user_id">
-                                    <Button variant="text" severity="secondary" v-tooltip.top="{ value: 'Edit' }"
-                                        @click="emit('edit-requested', { data: data, type: type })">
-                                        <PenLine />
-                                    </Button>
-                                    <Button variant="text" severity="danger" v-tooltip.top="{ value: 'Delete' }"
-                                        @click="confirmDelete()">
-                                        <Trash />
-                                    </Button>
-                                </template>
-                            </ButtonGroup>
-                        </template>
+                            </template>
+                        </ButtonGroup>
                     </template>
                 </Card>
             </div>
@@ -70,6 +61,7 @@ import Card from 'primevue/card'
 import Divider from 'primevue/divider'
 import Image from 'primevue/image'
 
+import Clock from '@primeicons/vue/clock'
 import ThumbsUp from '@primeicons/vue/thumbs-up'
 import ThumbsUpFill from '@primeicons/vue/thumbs-up-fill'
 import PenLine from '@primeicons/vue/pen-line'

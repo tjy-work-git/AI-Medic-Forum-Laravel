@@ -20,8 +20,10 @@
                             </template>
                             <template #footer>
                                 <div class="flex flex-wrap justify-between">
-                                    <p>Posted on {{ post.created_at }}</p>
-                                    <p>{{ post.upvotes }} Upvotes</p>
+                                    <p><Clock /> {{ post.created_at }} </p>
+                                    <Badge :severity="current_user ? 'secondary' : 'primary'" size="large"
+                                        :value="post.upvote_count + ' Upvotes'">
+                                    </Badge>
                                 </div>
                             </template>
                         </Card>
@@ -37,13 +39,14 @@
 </template>
 
 <script setup>
-// Libraries
-import { onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
 
-// Primevue
-import Card from 'primevue/card';
-import ProgressSpinner from 'primevue/progressspinner';
+import Badge from 'primevue/badge'
+import Card from 'primevue/card'
+import ProgressSpinner from 'primevue/progressspinner'
+
+import Clock from '@primeicons/vue/clock'
 
 const props = defineProps({
     id: Number

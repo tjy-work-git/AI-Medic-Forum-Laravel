@@ -108,8 +108,8 @@
 
     <template v-else>
         <!-- Post Section -->
-        <div class="flex flex-col gap-2">
-            <div class="flex flex-wrap items-center">
+        <div class="mx-20">
+            <div class="flex flex-row items-center my-6">
                 <Button class="mx-6" variant="outlined" :disabled="isLoading" :loading="isLoading" rounded
                     @click="onBookmarkSubmit">
                     <template #icon>
@@ -117,48 +117,44 @@
                         <Bookmark v-else v-tooltip.bottom="{ value: 'Bookmark' }" />
                     </template>
                 </Button>
-                <h1 class="text-4xl font-bold my-6">{{ post.title }}</h1>
+                <h1 class="text-4xl font-bold">{{ post.title }}</h1>
             </div>
-        </div>
 
-        <ForumContentCard :data="post" type="post"
-            @updated="handleUpdated"
-            @edit-requested="handleEditRequested"
-            @report-requested="handleReportRequested" />
+            <ForumContentCard :data="post" type="post" @updated="handleUpdated" @edit-requested="handleEditRequested"
+                @report-requested="handleReportRequested" />
 
-        <div class="py-3">
-            <Divider align="left">
-                <h2 class="text-2xl font-bold">Comments
-                    <Badge :value="comments?.total ?? 0" severity="secondary" />
-                </h2>
-            </Divider>
-        </div>
+            <div class="py-3">
+                <Divider align="left">
+                    <h2 class="text-2xl font-bold">Comments
+                        <Badge :value="props.comments_data?.total ?? 0" severity="secondary" />
+                    </h2>
+                </Divider>
+            </div>
 
-        <!-- Comment Section : load after post render -->
-        <template v-if="!comments">
-            <ProgressSpinner />
-        </template>
-
-        <template v-else-if="comments.length == 0">
-            <p class="flex justify-center items-center min-h-[calc(100vh-40rem)]">No comments yet.</p>
-        </template>
-
-        <div v-else class="flex flex-col gap-4">
-            <template v-for="comment in comments" :key="comment.comment_id">
-                <ForumContentCard :data="comment" type="comment"
-                    @deleted="handleDeleted"
-                    @updated="handleUpdated"
-                    @edit-requested="handleEditRequested"
-                    @report-requested="handleReportRequested" />
+            <!-- Comment Section : load after post render -->
+            <template v-if="!comments">
+                <ProgressSpinner />
             </template>
-        </div>
 
-        <div class="py-12">
-            <Divider align="center">
-                <h2 class="text-xl text-gray-400">
-                    END OF DISCUSSION
-                </h2>
-            </Divider>
+            <template v-else-if="comments.length == 0">
+                <p class="flex justify-center items-center min-h-[calc(100vh-40rem)]">No comments yet.</p>
+            </template>
+
+            <div v-else class="flex flex-col gap-4">
+                <template v-for="comment in comments" :key="comment.comment_id">
+                    <ForumContentCard :data="comment" type="comment" @deleted="handleDeleted" @updated="handleUpdated"
+                        @edit-requested="handleEditRequested" @report-requested="handleReportRequested" />
+                </template>
+            </div>
+
+            <div class="py-12">
+                <Divider align="center">
+                    <h2 class="text-xl text-gray-400">
+                        END OF DISCUSSION
+                    </h2>
+                </Divider>
+            </div>
+
         </div>
     </template>
 </template>

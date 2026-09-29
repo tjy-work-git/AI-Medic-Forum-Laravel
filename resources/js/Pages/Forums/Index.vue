@@ -72,7 +72,7 @@
                                     </template>
                                     <template #footer>
                                         <div class="flex flex-wrap justify-between">
-                                            <p><b>{{ post.username ?? "[deleted]" }}</b> | {{ post.created_at }}</p>
+                                            <p><b>{{ post.username ?? "[deleted]" }}</b> <Clock /> {{ post.created_at }}</p>
                                             <Badge :severity="current_user ? 'secondary' : 'primary'" size="xlarge"
                                                 :value="post.upvotes + ' Upvotes'"></Badge>
                                         </div>
@@ -88,10 +88,8 @@
 </template>
 
 <script setup>
-// Libraries
 import { Link, Deferred, useForm } from '@inertiajs/vue3'
 
-// Primevue
 import Badge from 'primevue/badge'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -99,7 +97,7 @@ import InputText from 'primevue/inputtext'
 import ProgressSpinner from 'primevue/progressspinner'
 import Select from 'primevue/select'
 
-// Primevue Icons
+import Clock from '@primeicons/vue/clock'
 import Plus from '@primeicons/vue/plus'
 import Search from '@primeicons/vue/search'
 
