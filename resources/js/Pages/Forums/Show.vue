@@ -58,7 +58,7 @@
         <template #header>
             <h2 class="text-2xl font-bold">Summary</h2>
         </template>
-        <div class="w-full" v-html="summary"></div>
+        <div class="summary-content w-full" v-html="summary"></div>
         <div class="flex justify-end gap-2 my-4">
             <Button type="button" label="Summarize again"
                 @click="summaryResultDiagVisible = false; summaryDiagVisible = true" />
@@ -349,3 +349,27 @@ watch(() => props.comments_data?.data, (comments_data) => {
     }
 }, { immediate: true })
 </script>
+
+<style scoped>
+.summary-content :deep(h3) {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.summary-content :deep(p) {
+    margin: 0 0 0.875rem;
+    line-height: 1.6;
+}
+
+.summary-content :deep(ul),
+.summary-content :deep(ol) {
+    margin: 0 0 0.875rem;
+    padding-left: 1.5rem;
+}
+
+.summary-content :deep(li) {
+    margin: 0.25rem 0;
+    line-height: 1.6;
+}
+</style>
